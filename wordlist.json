@@ -1,0 +1,8 @@
+{
+  "_comentario": "Adicione ou remova palavras nas categorias abaixo. É só editar este arquivo em qualquer editor de texto.",
+  "arquivos_config": [".env", ".git", ".svn", ".DS_Store", "config.php", "config.json", "config.yml", "settings.py", ".htaccess", ".htpasswd"],
+  "pastas_admin": ["admin", "administrator", "login", "panel", "dashboard", "manage", "backend", "cp", "control", "user", "accounts"],
+  "backups": ["backup.zip", "backup.tar.gz", "backup.sql", "db.sql", "dump.sql", "backup", "old", "archive"],
+  "arquivos_sensiveis": ["id_rsa", "id_dsa", ".aws/credentials", ".npmrc", ".pypirc", "secret.key", "private.key"],
+  "pastas_comuns": ["assets", "static", "media", "uploads", "files", "download", "temp", "tmp", "cache", "logs"]
+}
