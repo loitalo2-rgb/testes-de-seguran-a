@@ -12,6 +12,7 @@ import fuzzer_moderno
 import scanner_visual
 from auditor_recon_dns import check_dns_email_security, inspect_recon_files, inspect_cookies_privacy
 from auditor_avancado import scan_ports, check_sensitive_files, detect_js_libraries, save_scan_history
+from auditor_nmap import run_nmap_scan
 
 PORT = 5000
 
@@ -101,10 +102,13 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             # 7. Scanner de Arquivos Sensíveis (.git, .env, backups)
             sensitive_findings = check_sensitive_files(target_url)
 
-            # 8. Scanner Rápido de Portas / Serviços Expostos
+            # 8. Auditoria com Nmap (ou Fallback Nativo)
+            nmap_res = run_nmap_scan(hostname)
+
+            # 9. Scanner Rápido de Portas / Serviços Expostos
             open_ports = scan_ports(hostname)
 
-            # 9. Fuzzing Rápido de Rotas
+            # 10. Fuzzing Rápido de Rotas
             top_paths = ["admin", "login", "api", "dashboard", ".env", "config.json", "wp-admin", "robots.txt", "swagger", "backup.zip"]
             fuzz_results = []
             for path in top_paths:
@@ -113,7 +117,7 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 if res:
                     fuzz_results.append(res)
 
-            # 10. Scanner de Vulnerabilidades (XSS e SQLi)
+            # 11. Scanner de Vulnerabilidades (XSS e SQLi)
             payloads = scanner_visual.load_payloads("payloads.json")
             vuln_results = []
             if payloads:
@@ -123,14 +127,13 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             criticos = sum(1 for f in auditor.findings if f['status'] == 'FAIL' and f['severity'] == 'Alta')
             medios = sum(1 for f in auditor.findings if f['status'] == 'FAIL' and f['severity'] == 'Média')
             criticos += sum(1 for v in vuln_results if 'Vulnerável' in v.get('Status', ''))
-            criticos += len(sensitive_findings) # Cada arquivo sensível exposto é crítico
+            criticos += len(sensitive_findings)
 
             if dns_res["spf"]["status"] == "FAIL":
                 medios += 1
             if dns_res["dmarc"]["status"] == "FAIL":
                 medios += 1
 
-            # Penalidade de score para arquivos sensíveis
             final_score = max(0, auditor.score - (len(sensitive_findings) * 20))
 
             response_payload = {
@@ -147,12 +150,12 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 "cookies": cookies_res,
                 "sensitive_files": sensitive_findings,
                 "ports": open_ports,
+                "nmap": nmap_res,
                 "js_libraries": js_libs,
                 "fuzzing": fuzz_results,
                 "vulnerabilidades": vuln_results
             }
 
-            # Salvar no histórico
             save_scan_history(response_payload)
 
             self.send_response(200)
@@ -168,7 +171,7 @@ def run_server():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), PentestHandler) as httpd:
         print("="*60)
-        print(f"🚀 PAINEL DE CONTROLE DE SEGURANÇA UNIFICADO!")
+        print(f"🚀 PAINEL DE CONTROLE DE SEGURANÇA UNIFICADO COM NMAP!")
         print(f"👉 Acesse no seu navegador: http://localhost:{PORT}")
         print("="*60)
         try:
