@@ -1,24 +1,46 @@
+import os
 import shutil
 import subprocess
 import socket
-import json
-import xml.etree.ElementTree as ET
+
+# Caminhos padrão do instalador oficial no Windows
+DEFAULT_NMAP_PATHS = [
+    r"C:\Program Files (x86)\Nmap\nmap.exe",
+    r"C:\Program Files\Nmap\nmap.exe"
+]
+
+def get_nmap_binary():
+    """
+    Localiza o binário executável do Nmap no sistema:
+    1. Verifica se está no PATH (nmap).
+    2. Procura nas pastas de instalação padrão do Windows.
+    """
+    binary = shutil.which("nmap")
+    if binary:
+        return binary
+
+    for path in DEFAULT_NMAP_PATHS:
+        if os.path.isfile(path):
+            return path
+
+    return None
 
 def is_nmap_available():
-    """Verifica se o binário do nmap está instalado no PATH do sistema operacional."""
-    return shutil.which("nmap") is not None
+    return get_nmap_binary() is not None
 
 def run_nmap_scan(target_host, fast_mode=True):
     """
-    Executa uma varredura via Nmap caso disponível no sistema,
-    ou fallback transparente para o scanner nativo em Python caso o nmap não esteja instalado.
+    Executa a varredura via Nmap oficial ou fallback nativo se não for encontrado.
     """
-    if is_nmap_available():
-        # Argumentos seguros: -sV (versões), -T4 (velocidade), -F (top 100 portas rápidas)
-        cmd = ["nmap", "-sV", "-T4", "-F", target_host]
+    nmap_bin = get_nmap_binary()
+
+    if nmap_bin:
+        # -sV: Versões de serviços, -T4: Modo rápido, -F: Top 100 portas mais comuns
+        # -Pn: Trata todos os hosts como online (evita falha por bloqueio de ping ICMP no Windows)
+        cmd = [nmap_bin, "-sV", "-T4", "-F", "-Pn", target_host]
         try:
-            print(f"[*] Executando Nmap no alvo: {target_host}...")
-            process = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            print(f"[*] Executando Nmap Oficial ({nmap_bin}) em: {target_host}...")
+            process = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
             output = process.stdout or ""
             
             ports_found = []
@@ -38,8 +60,9 @@ def run_nmap_scan(target_host, fast_mode=True):
                         })
 
             return {
-                "engine": "Nmap Official CLI",
+                "engine": "Nmap Official CLI (Ativo)",
                 "installed": True,
+                "binary_path": nmap_bin,
                 "command": " ".join(cmd),
                 "ports": ports_found,
                 "raw_output": output
@@ -48,10 +71,11 @@ def run_nmap_scan(target_host, fast_mode=True):
             return {
                 "engine": "Nmap Official CLI",
                 "installed": True,
+                "binary_path": nmap_bin,
                 "error": str(e)
             }
     else:
-        # Fallback elegante em Python caso o usuário ainda não tenha instalado o nmap.exe
+        # Fallback de sockets nativos caso o nmap realmente não seja encontrado
         common_ports = [21, 22, 25, 53, 80, 110, 143, 443, 465, 587, 993, 995, 3000, 3306, 5432, 6379, 8000, 8080, 8443, 27017]
         discovered = []
         for port in common_ports:
@@ -71,7 +95,7 @@ def run_nmap_scan(target_host, fast_mode=True):
         return {
             "engine": "Nmap Emulador Nativo (Python Socket Fallback)",
             "installed": False,
-            "tip": "Para utilizar o motor nativo completo com detecção de OS e fingerprinting do Nmap, instale-o em https://nmap.org/download.html",
+            "tip": "Para utilizar o Nmap nativo, instale-o em https://nmap.org/download.html",
             "ports": discovered,
-            "raw_output": f"Nmap CLI não encontrado no PATH do sistema. Varredura executada via fallback nativo com {len(discovered)} portas identificadas."
+            "raw_output": f"Varredura executada via fallback nativo com {len(discovered)} portas identificadas."
         }
