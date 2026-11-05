@@ -175,7 +175,8 @@
 
       <!-- Abas de Navegação -->
       <div class="flex flex-wrap border-b border-slate-800 gap-2">
-        <button onclick="mudarAba('tab-subdomains')" id="btn-tab-subdomains" class="tab-btn px-4 py-2.5 text-sm font-semibold text-rose-400 border-b-2 border-rose-500">Subdomínios (crt.sh)</button>
+        <button onclick="mudarAba('tab-whois')" id="btn-tab-whois" class="tab-btn px-4 py-2.5 text-sm font-semibold text-rose-400 border-b-2 border-rose-500">Domínio & WHOIS (OSINT)</button>
+        <button onclick="mudarAba('tab-subdomains')" id="btn-tab-subdomains" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Subdomínios (crt.sh)</button>
         <button onclick="mudarAba('tab-httpmethods')" id="btn-tab-httpmethods" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Métodos HTTP</button>
         <button onclick="mudarAba('tab-nmap')" id="btn-tab-nmap" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Nmap Scanner</button>
         <button onclick="mudarAba('tab-headers')" id="btn-tab-headers" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Headers OWASP</button>
@@ -191,8 +192,17 @@
         <button onclick="mudarAba('tab-history')" id="btn-tab-history" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Histórico</button>
       </div>
 
+      <!-- Conteúdo Aba 0: Domínio & WHOIS -->
+      <div id="tab-whois" class="tab-content bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="info" class="text-rose-400"></i> Registro de Domínio, Idade e Localização do Servidor</h3>
+          <span id="whois-risk-badge" class="text-xs font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300">Consultando...</span>
+        </div>
+        <div id="conteudo-whois" class="space-y-4 text-sm"></div>
+      </div>
+
       <!-- Conteúdo Aba 1: Subdomínios -->
-      <div id="tab-subdomains" class="tab-content bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+      <div id="tab-subdomains" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="globe-2" class="text-sky-400"></i> Descoberta de Subdomínios (Certificate Transparency)</h3>
           <span id="subdomains-count-badge" class="text-xs font-bold px-2.5 py-1 rounded bg-slate-800 text-sky-300">0 encontrados</span>
@@ -405,7 +415,46 @@
         document.getElementById('ssl-exp').innerText = data.ssl ? data.ssl.error : 'Sem SSL';
       }
 
-      // 2. Aba Subdomínios (crt.sh)
+      // 2. Aba Domínio & WHOIS / Localização
+      const boxWhois = document.getElementById('conteudo-whois');
+      const badgeWhois = document.getElementById('whois-risk-badge');
+      if (data.whois) {
+        const isHighRisk = data.whois.risk_level === 'ALTO';
+        badgeWhois.innerText = isHighRisk ? 'RISCO: DOMÍNIO RECENTE' : 'DOMÍNIO ESTABELECIDO';
+        badgeWhois.className = 'text-xs font-bold px-2.5 py-1 rounded ' + (isHighRisk ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300');
+
+        let whoisHtml = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+              <h4 class="font-bold text-slate-200 flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4 text-rose-400"></i> Ciclo de Vida do Domínio</h4>
+              <p><strong>Idade Calculada:</strong> <span class="font-bold ${isHighRisk ? 'text-rose-400' : 'text-emerald-400'}">${data.whois.age_text}</span></p>
+              <p><strong>Data de Registro / Criação:</strong> <span class="font-mono text-slate-300">${data.whois.created_date}</span></p>
+              <p><strong>Data de Vencimento / Expiração:</strong> <span class="font-mono text-slate-300">${data.whois.expires_date}</span></p>
+              <p><strong>Última Atualização:</strong> <span class="font-mono text-slate-400">${data.whois.updated_date}</span></p>
+              <p><strong>Registrador Oficial (Registrar):</strong> <span class="text-sky-300">${data.whois.registrar}</span></p>
+            </div>
+
+            <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+              <h4 class="font-bold text-slate-200 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i> Infraestrutura & Hospedagem</h4>
+              <p><strong>Endereço IP:</strong> <span class="font-mono text-indigo-400">${data.geo?.ip || 'N/A'}</span></p>
+              <p><strong>Localização Física:</strong> <span class="text-slate-300">${data.geo?.city ? data.geo.city + ', ' : ''}${data.geo?.country || 'Desconhecido'}</span></p>
+              <p><strong>Provedor / ASN:</strong> <span class="text-slate-300">${data.geo?.as_number || data.geo?.isp || 'Desconhecido'}</span></p>
+              <p><strong>Organização:</strong> <span class="text-slate-400">${data.geo?.org || 'N/A'}</span></p>
+              <div class="pt-2 flex gap-2">
+                ${data.geo?.is_cloudflare ? '<span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded font-bold">Protegido por Cloudflare</span>' : ''}
+                ${data.geo?.is_aws ? '<span class="text-xs bg-orange-500/20 text-orange-300 border border-orange-500/30 px-2 py-0.5 rounded font-bold">Hospedado na AWS</span>' : ''}
+              </div>
+            </div>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs">
+            <span class="font-semibold text-slate-300">Servidores de Nome Autoritativos (Nameservers):</span>
+            <span class="font-mono text-slate-400 ml-2">${(data.whois.nameservers || []).join(', ') || 'Não identificado'}</span>
+          </div>
+        `;
+        boxWhois.innerHTML = whoisHtml;
+      }
+
+      // 3. Aba Subdomínios (crt.sh)
       const boxSubs = document.getElementById('conteudo-subdomains');
       const badgeSubs = document.getElementById('subdomains-count-badge');
       if (data.subdomains) {

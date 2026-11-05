@@ -14,6 +14,7 @@ from auditor_recon_dns import check_dns_email_security, inspect_recon_files, ins
 from auditor_avancado import scan_ports, check_sensitive_files, detect_js_libraries, save_scan_history
 from auditor_nmap import run_nmap_scan
 from auditor_sub_methods import enumerate_subdomains_crtsh, check_http_methods
+from auditor_whois_geo import get_domain_whois_rdap, get_ip_geolocation
 
 PORT = 5000
 
@@ -110,6 +111,10 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             # 9. Enumeração Passiva de Subdomínios (Certificate Transparency crt.sh)
             subdomains_res = enumerate_subdomains_crtsh(hostname)
 
+            # 10. Inteligência de Domínio WHOIS/RDAP e Geolocalização de Servidor
+            whois_res = get_domain_whois_rdap(hostname)
+            geo_res = get_ip_geolocation(hostname)
+
             # 10. Auditoria com Nmap (fast, advanced ou deep)
             nmap_res = run_nmap_scan(hostname, mode=nmap_mode)
 
@@ -157,6 +162,8 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 "sensitive_files": sensitive_findings,
                 "http_methods": http_methods_res,
                 "subdomains": subdomains_res,
+                "whois": whois_res,
+                "geo": geo_res,
                 "ports": open_ports,
                 "nmap": nmap_res,
                 "js_libraries": js_libs,

@@ -1,5 +1,45 @@
 [
   {
+    "timestamp": "2026-11-05 13:18:38",
+    "target": "https://diskentulho.fun/",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-05 13:11:26",
+    "target": "https://diskentulho.fun/",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-05 13:04:19",
+    "target": "https://diskentulho.fun",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 2
+  },
+  {
+    "timestamp": "2026-11-05 12:59:25",
+    "target": "https://diskentulho.fun",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-05 12:54:56",
+    "target": "https://diskentulho.fun/",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
     "timestamp": "2026-11-05 12:38:35",
     "target": "https://diskentulho.fun/",
     "hostname": "diskentulho.fun",
