@@ -1,5 +1,21 @@
 [
   {
+    "timestamp": "2026-11-05 12:38:35",
+    "target": "https://diskentulho.fun/",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-05 12:35:39",
+    "target": "https://diskentulho.fun/",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
     "timestamp": "2026-11-05 12:09:49",
     "target": "https://diskentulho.fun/",
     "hostname": "diskentulho.fun",

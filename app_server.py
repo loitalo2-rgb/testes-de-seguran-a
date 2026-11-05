@@ -13,6 +13,7 @@ import scanner_visual
 from auditor_recon_dns import check_dns_email_security, inspect_recon_files, inspect_cookies_privacy
 from auditor_avancado import scan_ports, check_sensitive_files, detect_js_libraries, save_scan_history
 from auditor_nmap import run_nmap_scan
+from auditor_sub_methods import enumerate_subdomains_crtsh, check_http_methods
 
 PORT = 5000
 
@@ -52,7 +53,7 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 data = json.loads(post_data.decode('utf-8'))
                 target_url = data.get('url', '').strip()
-                nmap_mode = data.get('nmap_mode', 'fast') # fast, advanced ou deep
+                nmap_mode = data.get('nmap_mode', 'fast')
             except Exception:
                 self.send_response(400)
                 self.end_headers()
@@ -103,13 +104,19 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             # 7. Scanner de Arquivos Sensíveis (.git, .env, backups)
             sensitive_findings = check_sensitive_files(target_url)
 
-            # 8. Auditoria com Nmap (Modo escolhido: fast, advanced ou deep)
+            # 8. Detecção de Métodos HTTP Inseguros (TRACE, PUT, DELETE)
+            http_methods_res = check_http_methods(target_url)
+
+            # 9. Enumeração Passiva de Subdomínios (Certificate Transparency crt.sh)
+            subdomains_res = enumerate_subdomains_crtsh(hostname)
+
+            # 10. Auditoria com Nmap (fast, advanced ou deep)
             nmap_res = run_nmap_scan(hostname, mode=nmap_mode)
 
-            # 9. Scanner Rápido de Portas / Serviços Expostos
+            # 11. Scanner Rápido de Portas / Serviços Expostos
             open_ports = scan_ports(hostname)
 
-            # 10. Fuzzing Rápido de Rotas
+            # 12. Fuzzing Rápido de Rotas
             top_paths = ["admin", "login", "api", "dashboard", ".env", "config.json", "wp-admin", "robots.txt", "swagger", "backup.zip"]
             fuzz_results = []
             for path in top_paths:
@@ -118,7 +125,7 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 if res:
                     fuzz_results.append(res)
 
-            # 11. Scanner de Vulnerabilidades (XSS e SQLi)
+            # 13. Scanner de Vulnerabilidades (XSS e SQLi)
             payloads = scanner_visual.load_payloads("payloads.json")
             vuln_results = []
             if payloads:
@@ -134,8 +141,12 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 medios += 1
             if dns_res["dmarc"]["status"] == "FAIL":
                 medios += 1
+            if http_methods_res["status"] == "FAIL":
+                medios += 1
 
             final_score = max(0, auditor.score - (len(sensitive_findings) * 20))
+            if http_methods_res["trace_enabled"]:
+                final_score = max(0, final_score - 10)
 
             response_payload = {
                 "target": target_url,
@@ -150,6 +161,8 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 "recon": recon_res,
                 "cookies": cookies_res,
                 "sensitive_files": sensitive_findings,
+                "http_methods": http_methods_res,
+                "subdomains": subdomains_res,
                 "ports": open_ports,
                 "nmap": nmap_res,
                 "js_libraries": js_libs,
@@ -172,7 +185,7 @@ def run_server():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), PentestHandler) as httpd:
         print("="*60)
-        print(f"🚀 PAINEL DE CONTROLE DE SEGURANÇA UNIFICADO COM 3 MODOS NMAP!")
+        print(f"🚀 PAINEL DE CONTROLE DE SEGURANÇA UNIFICADO!")
         print(f"👉 Acesse no seu navegador: http://localhost:{PORT}")
         print("="*60)
         try:

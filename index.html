@@ -17,8 +17,8 @@
           <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
         </div>
         <div>
-          <h1 class="text-2xl font-bold tracking-tight">Security Suite <span class="text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-full ml-2">All-In-One + Nmap</span></h1>
-          <p class="text-sm text-slate-400">Auditoria completa com seleção de perfil Nmap (Rápido, Avançado ou Profundo)</p>
+          <h1 class="text-2xl font-bold tracking-tight">Security Suite <span class="text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-full ml-2">All-In-One Enterprise</span></h1>
+          <p class="text-sm text-slate-400">Auditoria completa com Nmap, Subdomínios (crt.sh), Métodos HTTP, Headers, DNS e Cookies</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
@@ -54,7 +54,7 @@
       <!-- Seletor dos 3 Modos do Nmap -->
       <div>
         <label class="block text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
-          <i data-lucide="sliders" class="w-4 h-4 text-rose-400"></i> Escolha o Nível de Profundidade da Varredura Nmap:
+          <i data-lucide="sliders" class="w-4 h-4 text-rose-400"></i> Nível de Profundidade da Varredura Nmap:
         </label>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Modo 1: Rápido -->
@@ -65,7 +65,7 @@
                 <span class="font-bold text-sm text-emerald-400 flex items-center gap-1.5"><i data-lucide="zap" class="w-4 h-4"></i> Modo Rápido</span>
                 <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">~10 seg</span>
               </div>
-              <p class="text-xs text-slate-400">Varre as Top 100 portas mais comuns e identifica versões de serviços (-F -sV).</p>
+              <p class="text-xs text-slate-400">Top 100 portas mais comuns e identificação de versões de serviços (-F -sV).</p>
             </div>
           </label>
 
@@ -99,10 +99,11 @@
       <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800">
         <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
           <span class="font-medium text-slate-300">Inclui:</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Subdomínios (crt.sh)</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Métodos HTTP (TRACE/PUT)</span>
           <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> OWASP Headers</span>
           <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Arquivos (.env/.git)</span>
           <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> SSL/TLS & DNS</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Fuzzing & SQLi/XSS</span>
         </div>
         <button 
           onclick="executarScanGeral()" 
@@ -121,7 +122,7 @@
           <div class="animate-spin text-rose-400">
             <i data-lucide="loader-2" class="w-6 h-6"></i>
           </div>
-          <h3 class="font-semibold text-slate-200" id="loader-status">Executando Nmap e módulos de segurança...</h3>
+          <h3 class="font-semibold text-slate-200" id="loader-status">Consultando subdomínios, métodos HTTP, Nmap, DNS e headers...</h3>
         </div>
         <span class="text-xs font-mono text-rose-400" id="loader-mode-badge">Processando</span>
       </div>
@@ -174,7 +175,9 @@
 
       <!-- Abas de Navegação -->
       <div class="flex flex-wrap border-b border-slate-800 gap-2">
-        <button onclick="mudarAba('tab-nmap')" id="btn-tab-nmap" class="tab-btn px-4 py-2.5 text-sm font-semibold text-rose-400 border-b-2 border-rose-500">Nmap Scanner</button>
+        <button onclick="mudarAba('tab-subdomains')" id="btn-tab-subdomains" class="tab-btn px-4 py-2.5 text-sm font-semibold text-rose-400 border-b-2 border-rose-500">Subdomínios (crt.sh)</button>
+        <button onclick="mudarAba('tab-httpmethods')" id="btn-tab-httpmethods" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Métodos HTTP</button>
+        <button onclick="mudarAba('tab-nmap')" id="btn-tab-nmap" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Nmap Scanner</button>
         <button onclick="mudarAba('tab-headers')" id="btn-tab-headers" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Headers OWASP</button>
         <button onclick="mudarAba('tab-sensitive')" id="btn-tab-sensitive" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Arquivos Sensíveis</button>
         <button onclick="mudarAba('tab-ports')" id="btn-tab-ports" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Portas Web & DB</button>
@@ -188,8 +191,24 @@
         <button onclick="mudarAba('tab-history')" id="btn-tab-history" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Histórico</button>
       </div>
 
-      <!-- Conteúdo Aba 1: Nmap -->
-      <div id="tab-nmap" class="tab-content bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+      <!-- Conteúdo Aba 1: Subdomínios -->
+      <div id="tab-subdomains" class="tab-content bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="globe-2" class="text-sky-400"></i> Descoberta de Subdomínios (Certificate Transparency)</h3>
+          <span id="subdomains-count-badge" class="text-xs font-bold px-2.5 py-1 rounded bg-slate-800 text-sky-300">0 encontrados</span>
+        </div>
+        <p class="text-xs text-slate-400">Mapeamento 100% passivo baseado em certificados SSL emitidos publicamente para o domínio.</p>
+        <div id="conteudo-subdomains" class="space-y-2 text-sm"></div>
+      </div>
+
+      <!-- Conteúdo Aba 2: Métodos HTTP -->
+      <div id="tab-httpmethods" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="arrow-left-right" class="text-amber-400"></i> Métodos HTTP e Verificação de Risco (TRACE, PUT, DELETE)</h3>
+        <div id="conteudo-httpmethods" class="space-y-4 text-sm"></div>
+      </div>
+
+      <!-- Conteúdo Aba 3: Nmap -->
+      <div id="tab-nmap" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="terminal" class="text-rose-400"></i> Auditoria de Rede via Nmap</h3>
           <div class="flex items-center gap-2">
@@ -200,67 +219,67 @@
         <div id="conteudo-nmap" class="space-y-3 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 2: Headers -->
+      <!-- Conteúdo Aba 4: Headers -->
       <div id="tab-headers" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="list-checks" class="text-rose-400"></i> Cabeçalhos de Segurança HTTP (OWASP)</h3>
         <div class="space-y-3" id="lista-headers"></div>
       </div>
 
-      <!-- Conteúdo Aba 3: Arquivos Sensíveis -->
+      <!-- Conteúdo Aba 5: Arquivos Sensíveis -->
       <div id="tab-sensitive" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="file-warning" class="text-rose-400"></i> Verificação de Arquivos Expostos (.env, .git, dumps)</h3>
         <div id="conteudo-sensitive" class="space-y-3 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 4: Portas -->
+      <!-- Conteúdo Aba 6: Portas -->
       <div id="tab-ports" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="radio" class="text-emerald-400"></i> Portas Abertas e Serviços Detectados</h3>
         <div id="conteudo-ports" class="space-y-3 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 5: Bibliotecas JS -->
+      <!-- Conteúdo Aba 7: Bibliotecas JS -->
       <div id="tab-libs" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="layers" class="text-sky-400"></i> Componentes Frontend e Bibliotecas JavaScript</h3>
         <div id="conteudo-libs" class="space-y-3 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 6: DNS -->
+      <!-- Conteúdo Aba 8: DNS -->
       <div id="tab-dns" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="network" class="text-blue-400"></i> Registros de DNS e Proteção de E-mail</h3>
         <div id="conteudo-dns" class="space-y-4 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 7: Recon -->
+      <!-- Conteúdo Aba 9: Recon -->
       <div id="tab-recon" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="compass" class="text-amber-400"></i> Mapeamento de /robots.txt e /sitemap.xml</h3>
         <div id="conteudo-recon" class="space-y-4 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 8: Cookies -->
+      <!-- Conteúdo Aba 10: Cookies -->
       <div id="tab-cookies" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="cookie" class="text-yellow-400"></i> Flags e Conformidade de Cookies</h3>
         <div id="conteudo-cookies" class="space-y-3 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 9: SSL -->
+      <!-- Conteúdo Aba 11: SSL -->
       <div id="tab-ssl" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="key" class="text-indigo-400"></i> Detalhes da Cifra e Certificado SSL/TLS</h3>
         <div id="conteudo-ssl" class="space-y-2 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 10: Fuzzing -->
+      <!-- Conteúdo Aba 12: Fuzzing -->
       <div id="tab-fuzz" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="folder-search" class="text-amber-400"></i> Rotas Mapeadas</h3>
         <div id="conteudo-fuzz" class="space-y-2 font-mono text-xs"></div>
       </div>
 
-      <!-- Conteúdo Aba 11: Vulnerabilidades -->
+      <!-- Conteúdo Aba 13: Vulnerabilidades -->
       <div id="tab-vuln" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="bug" class="text-rose-400"></i> Testes de Injeção de Parâmetros</h3>
         <div id="conteudo-vuln" class="space-y-2"></div>
       </div>
 
-      <!-- Conteúdo Aba 12: Histórico -->
+      <!-- Conteúdo Aba 14: Histórico -->
       <div id="tab-history" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="history" class="text-purple-400"></i> Histórico Local de Varreduras</h3>
         <div id="conteudo-history" class="space-y-2 text-sm"></div>
@@ -386,7 +405,54 @@
         document.getElementById('ssl-exp').innerText = data.ssl ? data.ssl.error : 'Sem SSL';
       }
 
-      // 2. Aba Nmap
+      // 2. Aba Subdomínios (crt.sh)
+      const boxSubs = document.getElementById('conteudo-subdomains');
+      const badgeSubs = document.getElementById('subdomains-count-badge');
+      if (data.subdomains) {
+        badgeSubs.innerText = `${data.subdomains.total_found || 0} encontrados`;
+        if (data.subdomains.subdomains && data.subdomains.subdomains.length > 0) {
+          let subsHtml = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">';
+          data.subdomains.subdomains.forEach(s => {
+            subsHtml += `
+              <div class="p-3 bg-slate-950 rounded-xl border border-sky-500/30 flex items-center gap-2">
+                <i data-lucide="link" class="w-4 h-4 text-sky-400 shrink-0"></i>
+                <a href="https://${s}" target="_blank" class="text-xs font-mono text-sky-300 hover:underline truncate">${s}</a>
+              </div>
+            `;
+          });
+          subsHtml += '</div>';
+          boxSubs.innerHTML = subsHtml;
+        } else {
+          boxSubs.innerHTML = `<p class="text-slate-400">${data.subdomains.error || 'Nenhum subdomínio público registrado via certificados para este host.'}</p>`;
+        }
+      }
+
+      // 3. Aba Métodos HTTP
+      const boxMethods = document.getElementById('conteudo-httpmethods');
+      if (data.http_methods) {
+        const pass = data.http_methods.status === 'PASS';
+        let methodsHtml = `
+          <div class="p-4 rounded-xl border ${pass ? 'border-emerald-500/30 bg-emerald-950/10' : 'border-amber-500/30 bg-amber-950/10'} space-y-2">
+            <div class="flex items-center justify-between">
+              <strong>Status dos Métodos HTTP</strong>
+              <span class="text-xs font-bold px-2 py-0.5 rounded ${pass ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${data.http_methods.status}</span>
+            </div>
+            <p class="text-xs text-slate-300">${data.http_methods.recommendation}</p>
+          </div>
+          <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+            <p class="font-semibold text-slate-300">Métodos Permitidos (Allow Header):</p>
+            <div class="flex flex-wrap gap-2">
+              ${(data.http_methods.allowed_methods || []).map(m => {
+                const risky = ['TRACE', 'PUT', 'DELETE', 'TRACK'].includes(m);
+                return `<span class="px-2.5 py-1 rounded text-xs font-mono font-bold ${risky ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-slate-800 text-slate-300'}">${m}</span>`;
+              }).join('') || '<span class="text-xs text-slate-500">Cabeçalho Allow não retornado pelo servidor</span>'}
+            </div>
+          </div>
+        `;
+        boxMethods.innerHTML = methodsHtml;
+      }
+
+      // 4. Aba Nmap
       const boxNmap = document.getElementById('conteudo-nmap');
       const badgeNmap = document.getElementById('nmap-engine-badge');
       const labelNmap = document.getElementById('nmap-mode-label');
@@ -435,7 +501,7 @@
         boxNmap.innerHTML = nmapHtml;
       }
 
-      // 3. Aba Headers
+      // 5. Aba Headers
       const listHeaders = document.getElementById('lista-headers');
       listHeaders.innerHTML = '';
       (data.headers || []).forEach(h => {
@@ -454,7 +520,7 @@
         `;
       });
 
-      // 4. Aba Arquivos Sensíveis
+      // 6. Aba Arquivos Sensíveis
       const boxSens = document.getElementById('conteudo-sensitive');
       boxSens.innerHTML = '';
       if (data.sensitive_files && data.sensitive_files.length > 0) {
@@ -474,7 +540,7 @@
         boxSens.innerHTML = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400">✓ Nenhum arquivo sensível (.env, .git, backups de banco de dados) foi detectado na raiz da aplicação.</div>`;
       }
 
-      // 5. Aba Portas
+      // 7. Aba Portas
       const boxPorts = document.getElementById('conteudo-ports');
       boxPorts.innerHTML = '';
       if (data.ports && data.ports.length > 0) {
@@ -496,7 +562,7 @@
         boxPorts.innerHTML = `<p class="text-slate-400">Nenhuma porta comum de banco ou dev aberta diretamente para a internet.</p>`;
       }
 
-      // 6. Aba Bibliotecas JS
+      // 8. Aba Bibliotecas JS
       const boxLibs = document.getElementById('conteudo-libs');
       boxLibs.innerHTML = '';
       if (data.js_libraries && data.js_libraries.length > 0) {
@@ -518,7 +584,7 @@
         boxLibs.innerHTML = `<p class="text-slate-400">Nenhuma biblioteca frontend comum identificada no HTML base.</p>`;
       }
 
-      // 7. Aba DNS
+      // 9. Aba DNS
       const boxDns = document.getElementById('conteudo-dns');
       const spfPass = data.dns?.spf?.status === 'PASS';
       const dmarcPass = data.dns?.dmarc?.status === 'PASS';
@@ -549,7 +615,7 @@
         </div>
       `;
 
-      // 8. Aba Recon
+      // 10. Aba Recon
       const boxRecon = document.getElementById('conteudo-recon');
       const r = data.recon;
       boxRecon.innerHTML = `
@@ -578,7 +644,7 @@
         </div>
       `;
 
-      // 9. Aba Cookies
+      // 11. Aba Cookies
       const boxCookies = document.getElementById('conteudo-cookies');
       boxCookies.innerHTML = '';
       if (data.cookies && data.cookies.length > 0) {
@@ -603,7 +669,7 @@
         boxCookies.innerHTML = `<p class="text-slate-400">Nenhum cookie definido na resposta inicial da aplicação.</p>`;
       }
 
-      // 10. Aba SSL
+      // 12. Aba SSL
       const boxSsl = document.getElementById('conteudo-ssl');
       if (data.ssl && !data.ssl.error) {
         boxSsl.innerHTML = `
@@ -619,7 +685,7 @@
         boxSsl.innerHTML = `<p class="text-rose-400">Não foi possível auditar o certificado SSL/TLS: ${data.ssl?.error || 'Desconhecido'}</p>`;
       }
 
-      // 11. Aba Fuzzing
+      // 13. Aba Fuzzing
       const boxFuzz = document.getElementById('conteudo-fuzz');
       boxFuzz.innerHTML = '';
       if (data.fuzzing && data.fuzzing.length > 0) {
@@ -630,7 +696,7 @@
         boxFuzz.innerHTML = `<p class="text-slate-400">Nenhum diretório padrão exposto ou vulnerável encontrado.</p>`;
       }
 
-      // 12. Aba Vulnerabilidades
+      // 14. Aba Vulnerabilidades
       const boxVuln = document.getElementById('conteudo-vuln');
       boxVuln.innerHTML = '';
       if (data.vulnerabilidades && data.vulnerabilidades.length > 0) {
