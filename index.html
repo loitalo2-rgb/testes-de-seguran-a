@@ -685,12 +685,26 @@
         boxSsl.innerHTML = `<p class="text-rose-400">Não foi possível auditar o certificado SSL/TLS: ${data.ssl?.error || 'Desconhecido'}</p>`;
       }
 
-      // 13. Aba Fuzzing
+      // 13. Aba Fuzzing (Rotas & Subpastas)
       const boxFuzz = document.getElementById('conteudo-fuzz');
       boxFuzz.innerHTML = '';
       if (data.fuzzing && data.fuzzing.length > 0) {
         data.fuzzing.forEach(r => {
-          boxFuzz.innerHTML += `<div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800 text-emerald-400">${r}</div>`;
+          const txt = typeof r === 'object' ? (r.label || r.url || JSON.stringify(r)) : r;
+          const isSub = txt.includes('[Subpasta]');
+          const is200 = txt.includes('200 OK');
+          const is403 = txt.includes('403 Forbidden');
+          
+          let colorClass = 'text-emerald-400 border-emerald-500/30';
+          if (is403) colorClass = 'text-amber-400 border-amber-500/30';
+          if (isSub) colorClass = 'text-sky-400 border-sky-500/30';
+
+          boxFuzz.innerHTML += `
+            <div class="p-3 bg-slate-950 rounded-lg border ${colorClass} flex items-center justify-between text-xs">
+              <span class="font-mono">${txt}</span>
+              <span class="text-xs px-2 py-0.5 rounded ${is200 ? 'bg-emerald-500/20 text-emerald-300' : (is403 ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-300')}">${isSub ? 'Subpasta' : 'Raiz'}</span>
+            </div>
+          `;
         });
       } else {
         boxFuzz.innerHTML = `<p class="text-slate-400">Nenhum diretório padrão exposto ou vulnerável encontrado.</p>`;

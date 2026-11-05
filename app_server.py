@@ -116,14 +116,8 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             # 11. Scanner Rápido de Portas / Serviços Expostos
             open_ports = scan_ports(hostname)
 
-            # 12. Fuzzing Rápido de Rotas
-            top_paths = ["admin", "login", "api", "dashboard", ".env", "config.json", "wp-admin", "robots.txt", "swagger", "backup.zip"]
-            fuzz_results = []
-            for path in top_paths:
-                full_test_url = f"{target_url.rstrip('/')}/{path}"
-                res = fuzzer_moderno.check_url(full_test_url)
-                if res:
-                    fuzz_results.append(res)
+            # 12. Fuzzing e Busca de Pastas & Subpastas
+            fuzz_results = fuzzer_moderno.start_fuzzing(target_url, recursive=True)
 
             # 13. Scanner de Vulnerabilidades (XSS e SQLi)
             payloads = scanner_visual.load_payloads("payloads.json")
