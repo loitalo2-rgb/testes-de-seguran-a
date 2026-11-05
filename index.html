@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QA Web Inspector & Advanced Security Suite v3.0</title>
+  <title>Security Suite Pro - Varredura Automática Unificada</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -14,25 +14,25 @@
     <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 border-b border-slate-800 pb-5 gap-4">
       <div class="flex items-center gap-3">
         <div class="p-3 bg-gradient-to-tr from-rose-600 to-indigo-600 rounded-xl shadow-lg shadow-rose-500/20">
-          <i data-lucide="shield-alert" class="w-8 h-8 text-white"></i>
+          <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
         </div>
         <div>
-          <h1 class="text-2xl font-bold tracking-tight">QA Web Inspector <span class="text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded-full ml-2">v3.0 Security Pro</span></h1>
-          <p class="text-sm text-slate-400">Scanner Avançado OWASP Top 10, Headers de Segurança e Estabilidade RPA</p>
+          <h1 class="text-2xl font-bold tracking-tight">Security Suite <span class="text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-full ml-2">All-In-One Pro</span></h1>
+          <p class="text-sm text-slate-400">Insira a URL e o sistema analisa Headers, SSL/TLS, Rotas Ocultas e Injeção automaticamente</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <span class="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Módulos de Segurança Ativos
+        <span class="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3.5 py-1.5 rounded-lg flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Servidor Local Conectado (:5000)
         </span>
       </div>
     </header>
 
-    <!-- URL Input & Mode Selector -->
+    <!-- URL Input & Action -->
     <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-2xl mb-8">
       <div class="flex flex-col gap-4">
         <label for="url-input" class="block text-sm font-semibold text-slate-300">
-          Endereço Alvo (URL):
+          Endereço do Alvo para Análise Completa:
         </label>
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="relative flex-1">
@@ -41,113 +41,119 @@
             </div>
             <input 
               id="url-input" 
-              type="url" 
-              placeholder="https://exemplo.com.br" 
-              value="https://meusistema.com.br" 
+              type="text" 
+              placeholder="ex: https://example.com ou https://google.com" 
+              value="https://example.com" 
               class="w-full bg-slate-950 border border-slate-700/80 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500 transition"
             />
           </div>
           <button 
-            onclick="iniciarAnaliseAvancada()" 
+            onclick="executarScanGeral()" 
             id="btn-analisar"
-            class="bg-rose-600 hover:bg-rose-500 text-white font-semibold px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 transition-all active:scale-95"
+            class="bg-gradient-to-r from-rose-600 to-indigo-600 hover:opacity-90 text-white font-semibold px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 transition-all active:scale-95"
           >
-            <i data-lucide="shield-check" class="w-5 h-5"></i> Executar Varredura de Segurança
+            <i data-lucide="play" class="w-5 h-5 fill-current"></i> Analisar Tudo Automaticamente
           </button>
         </div>
 
-        <!-- Escopo Ampliado -->
         <div class="flex flex-wrap items-center gap-4 pt-2 border-t border-slate-800 text-xs text-slate-400">
-          <span class="font-medium text-slate-300">Testes Incluídos:</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> OWASP Top 10 Headers</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Clickjacking & CORS</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Fingerprinting & Cookies</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Resiliência RPA</span>
+          <span class="font-medium text-slate-300">Módulos acionados:</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> OWASP Secure Headers</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Criptografia SSL/TLS</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Fuzzing de Diretórios</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Scanner XSS / SQLi</span>
         </div>
       </div>
     </div>
 
-    <!-- Status da Análise / Terminal -->
+    <!-- Barra de Progresso e Logs de Execução -->
     <div id="loader" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 mb-8 space-y-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="animate-spin text-rose-400">
             <i data-lucide="loader-2" class="w-6 h-6"></i>
           </div>
-          <h3 class="font-semibold text-slate-200" id="loader-status">Iniciando handshake e injeção de testes...</h3>
+          <h3 class="font-semibold text-slate-200" id="loader-status">Iniciando auditoria...</h3>
         </div>
-        <span class="text-xs font-mono text-rose-400" id="loader-percent">0%</span>
+        <span class="text-xs font-mono text-rose-400" id="loader-percent">Executando</span>
       </div>
       <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
-        <div id="progress-bar" class="bg-rose-500 h-full w-0 transition-all duration-300"></div>
-      </div>
-      <div id="terminal-log" class="bg-slate-950 p-3 rounded-lg font-mono text-xs text-slate-400 h-32 overflow-y-auto space-y-1 border border-slate-800/80">
-        <p class="text-slate-500">> Aguardando inicialização do scanner de segurança...</p>
+        <div id="progress-bar" class="bg-gradient-to-r from-rose-500 to-indigo-500 h-full w-2/3 animate-pulse"></div>
       </div>
     </div>
 
-    <!-- Resultados -->
+    <!-- Área de Resultados Globais -->
     <div id="resultados" class="hidden space-y-6">
 
-      <!-- Métricas Superiores -->
+      <!-- Métricas em Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
           <div class="flex items-center justify-between text-slate-400 text-sm">
-            <span>Score de Segurança</span>
-            <i data-lucide="shield" class="w-4 h-4 text-rose-400"></i>
+            <span>Score de Conformidade</span>
+            <i data-lucide="shield" class="w-4 h-4 text-emerald-400"></i>
           </div>
-          <div class="text-3xl font-extrabold text-rose-400 mt-2" id="score">45/100</div>
-          <p class="text-xs text-rose-400/80 mt-1">Múltiplas falhas críticas detectadas</p>
+          <div class="text-3xl font-extrabold mt-2" id="score-val">0/100</div>
+          <p class="text-xs text-slate-400 mt-1" id="score-desc">Avaliação baseada no OWASP</p>
         </div>
 
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
           <div class="flex items-center justify-between text-slate-400 text-sm">
-            <span>Vulnerabilidades Críticas</span>
+            <span>Falhas Críticas</span>
             <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500"></i>
           </div>
-          <div class="text-3xl font-extrabold text-rose-500 mt-2" id="total-criticos">4</div>
-          <p class="text-xs text-slate-400 mt-1">Requer correção imediata</p>
+          <div class="text-3xl font-extrabold text-rose-500 mt-2" id="criticos-val">0</div>
+          <p class="text-xs text-slate-400 mt-1">Requer ação corretiva</p>
         </div>
 
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
           <div class="flex items-center justify-between text-slate-400 text-sm">
-            <span>Falhas Médias / Avisos</span>
+            <span>Avisos / Médios</span>
             <i data-lucide="info" class="w-4 h-4 text-amber-400"></i>
           </div>
-          <div class="text-3xl font-extrabold text-amber-400 mt-2" id="total-medios">3</div>
-          <p class="text-xs text-slate-400 mt-1">Riscos de configuração</p>
+          <div class="text-3xl font-extrabold text-amber-400 mt-2" id="medios-val">0</div>
+          <p class="text-xs text-slate-400 mt-1">Pontos de melhoria</p>
         </div>
 
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
           <div class="flex items-center justify-between text-slate-400 text-sm">
-            <span>Tempo de Resposta HTTP</span>
-            <i data-lucide="zap" class="w-4 h-4 text-emerald-400"></i>
+            <span>Criptografia SSL</span>
+            <i data-lucide="lock" class="w-4 h-4 text-indigo-400"></i>
           </div>
-          <div class="text-3xl font-extrabold text-emerald-400 mt-2" id="tempo-resposta">280 ms</div>
-          <p class="text-xs text-slate-400 mt-1">Servidor online</p>
+          <div class="text-lg font-bold text-indigo-300 mt-2 truncate" id="ssl-status">Verificando...</div>
+          <p class="text-xs text-slate-400 mt-1" id="ssl-exp">Expiração do certificado</p>
         </div>
       </div>
 
-      <!-- Filtros -->
-      <div class="flex flex-wrap items-center justify-between bg-slate-900 p-4 rounded-xl border border-slate-800 gap-3">
-        <div class="flex items-center gap-2">
-          <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
-          <span class="text-sm font-semibold">Filtrar Categoria:</span>
-        </div>
-        <div class="flex flex-wrap gap-2 text-xs">
-          <button onclick="filtrarCat('TODOS')" class="btn-f bg-rose-600 text-white px-3 py-1.5 rounded-lg">Todos</button>
-          <button onclick="filtrarCat('OWASP')" class="btn-f bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg">OWASP / Headers</button>
-          <button onclick="filtrarCat('PRIVACIDADE')" class="btn-f bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg">Privacidade & Cookies</button>
-          <button onclick="filtrarCat('RPA')" class="btn-f bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg">Estabilidade RPA</button>
-        </div>
+      <!-- Abas de Navegação dos Módulos -->
+      <div class="flex border-b border-slate-800 gap-2">
+        <button onclick="mudarAba('tab-headers')" id="btn-tab-headers" class="tab-btn px-4 py-2 text-sm font-semibold text-rose-400 border-b-2 border-rose-500">Cabeçalhos HTTP (OWASP)</button>
+        <button onclick="mudarAba('tab-ssl')" id="btn-tab-ssl" class="tab-btn px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white">Auditoria SSL/TLS</button>
+        <button onclick="mudarAba('tab-fuzz')" id="btn-tab-fuzz" class="tab-btn px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white">Rotas Descobertas (Fuzzing)</button>
+        <button onclick="mudarAba('tab-vuln')" id="btn-tab-vuln" class="tab-btn px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white">Injeções (XSS & SQLi)</button>
       </div>
 
-      <!-- Lista de Falhas -->
-      <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-          <i data-lucide="bug" class="text-rose-400"></i> Relatório de Falhas e Ocorrências de Segurança
-        </h2>
-        <div class="space-y-4" id="lista-falhas"></div>
+      <!-- Conteúdo Aba 1: Headers -->
+      <div id="tab-headers" class="tab-content bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="list-checks" class="text-rose-400"></i> Cabeçalhos de Segurança HTTP</h3>
+        <div class="space-y-3" id="lista-headers"></div>
+      </div>
+
+      <!-- Conteúdo Aba 2: SSL -->
+      <div id="tab-ssl" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="key" class="text-indigo-400"></i> Detalhes da Cifra e Certificado</h3>
+        <div id="conteudo-ssl" class="space-y-2 text-sm"></div>
+      </div>
+
+      <!-- Conteúdo Aba 3: Fuzzing -->
+      <div id="tab-fuzz" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="folder-search" class="text-amber-400"></i> Diretórios e Arquivos Mapeados</h3>
+        <div id="conteudo-fuzz" class="space-y-2 font-mono text-xs"></div>
+      </div>
+
+      <!-- Conteúdo Aba 4: Vulnerabilidades -->
+      <div id="tab-vuln" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="bug" class="text-rose-400"></i> Testes de Injeção de Parâmetros</h3>
+        <div id="conteudo-vuln" class="space-y-2"></div>
       </div>
 
     </div>
@@ -155,134 +161,134 @@
 
   <script>
     lucide.createIcons();
-    let listaGlobal = [];
 
-    function logTerm(msg) {
-      const box = document.getElementById('terminal-log');
-      box.innerHTML += `<p class="text-slate-300">> ${msg}</p>`;
-      box.scrollTop = box.scrollHeight;
+    function mudarAba(id) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('text-rose-400', 'border-b-2', 'border-rose-500');
+        el.classList.add('text-slate-400');
+      });
+      document.getElementById(id).classList.remove('hidden');
+      const activeBtn = document.getElementById('btn-' + id);
+      activeBtn.classList.remove('text-slate-400');
+      activeBtn.classList.add('text-rose-400', 'border-b-2', 'border-rose-500');
     }
 
-    function iniciarAnaliseAvancada() {
-      const url = document.getElementById('url-input').value;
+    async function executarScanGeral() {
+      const url = document.getElementById('url-input').value.trim();
       if (!url) {
-        alert('Insira uma URL válida!');
+        alert('Digite uma URL válida!');
         return;
       }
 
       document.getElementById('resultados').classList.add('hidden');
       document.getElementById('loader').classList.remove('hidden');
-      document.getElementById('terminal-log').innerHTML = '';
+      document.getElementById('btn-analisar').disabled = true;
 
-      const bar = document.getElementById('progress-bar');
-      const pctTxt = document.getElementById('loader-percent');
-      const statusTxt = document.getElementById('loader-status');
+      try {
+        const response = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url })
+        });
 
-      const etapas = [
-        { p: 20, s: "Validando headers de proteção contra Clickjacking e XSS...", l: "SECURITY: Verificando X-Frame-Options e CSP..." },
-        { p: 40, s: "Analisando políticas de CORS e exposição de versão (Fingerprinting)...", l: "INFRA: Checando cabeçalhos Server e Access-Control-Allow-Origin..." },
-        { p: 65, s: "Inspecionando diretivas HSTS e flags de Cookies de Sessão...", l: "PRIVACY: Testando criptografia estrita e SameSite/Secure..." },
-        { p: 85, s: "Analisando seletores DOM e resiliência de elementos para automação...", l: "RPA: Mapeando elementos de formulário dinâmicos..." },
-        { p: 100, s: "Montando dashboard de vulnerabilidades...", l: "CONCLUÍDO: Relatório gerado com sucesso." }
-      ];
+        if (!response.ok) throw new Error('Falha na resposta do servidor');
+        const data = await response.json();
 
-      let i = 0;
-      const t = setInterval(() => {
-        if (i < etapas.length) {
-          bar.style.width = etapas[i].p + '%';
-          pctTxt.innerText = etapas[i].p + '%';
-          statusTxt.innerText = etapas[i].s;
-          logTerm(etapas[i].l);
-          i++;
-        } else {
-          clearInterval(t);
-          carregarResultados(url);
-        }
-      }, 700);
+        renderizarResultados(data);
+      } catch (err) {
+        alert('Erro ao se comunicar com o servidor backend: ' + err.message + '\nVerifique se o app_server.py está em execução.');
+      } finally {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('btn-analisar').disabled = false;
+      }
     }
 
-    function carregarResultados(url) {
-      document.getElementById('loader').classList.add('hidden');
+    function renderizarResultados(data) {
       document.getElementById('resultados').classList.remove('hidden');
 
-      listaGlobal = [
-        {
-          cat: 'OWASP',
-          nivel: 'CRÍTICO',
-          badge: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-          titulo: 'Ausência de Proteção contra Clickjacking (X-Frame-Options)',
-          desc: `O site ${url} não envia o cabeçalho 'X-Frame-Options' ou 'CSP frame-ancestors'.`,
-          impacto: 'Permite que atacantes embutam sua aplicação em iframes invisíveis, forçando cliques de usuários maliciosamente.',
-          fix: 'Configurar o servidor para enviar o cabeçalho X-Frame-Options: DENY ou SAMEORIGIN.'
-        },
-        {
-          cat: 'OWASP',
-          nivel: 'CRÍTICO',
-          badge: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-          titulo: 'Exposição de Versão do Servidor (Fingerprinting)',
-          desc: 'O cabeçalho HTTP "Server" ou "X-Powered-By" revela a tecnologia e versão exata do backend.',
-          impacto: 'Facilita ataques direcionados explorando falhas conhecidas (CVEs) da versão exposta.',
-          fix: 'Ocultar ou remover a assinatura de versão nos arquivos de configuração do servidor web (Nginx/Apache/IIS).'
-        },
-        {
-          cat: 'PRIVACIDADE',
-          nivel: 'CRÍTICO',
-          badge: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-          titulo: 'Configuração Insegurada de CORS (Permissivo *)',
-          desc: "O cabeçalho 'Access-Control-Allow-Origin' está configurado como '*' permitindo acesso cruzado irrestrito.",
-          impacto: 'Qualquer site malicioso na web pode ler dados confidenciais retornados por APIs autenticadas do usuário.',
-          fix: 'Restringir a permissão de origem cruzada apenas para domínios confiáveis e específicos.'
-        },
-        {
-          cat: 'PRIVACIDADE',
-          nivel: 'MÉDIO',
-          badge: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-          titulo: 'Ausência de Strict-Transport-Security (HSTS)',
-          desc: 'O cabeçalho HSTS não está ativo na resposta de conexões seguras.',
-          impacto: 'Expõe os usuários a ataques de interceptação (SSL Stripping) no primeiro acesso via HTTP.',
-          fix: 'Ativar o header Strict-Transport-Security com tempo mínimo de expiração de 1 ano.'
-        },
-        {
-          cat: 'RPA',
-          nivel: 'MÉDIO',
-          badge: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-          titulo: 'Formulário de Login com IDs e Names Dinâmicos',
-          desc: 'Os inputs de credenciais possuem identificadores gerados randomicamente por frameworks frontend.',
-          impacto: 'Robôs baseados em Selenium/Playwright perderão o vínculo de automação em atualizações do sistema.',
-          fix: 'Inserir atributos fixos e dedicados como data-testid="campo-usuario".'
-        }
-      ];
+      // 1. Métricas
+      const scoreEl = document.getElementById('score-val');
+      scoreEl.innerText = data.score + '/100';
+      scoreEl.className = 'text-3xl font-extrabold mt-2 ' + (data.score >= 70 ? 'text-emerald-400' : 'text-rose-400');
+      document.getElementById('criticos-val').innerText = data.criticos;
+      document.getElementById('medios-val').innerText = data.medios;
 
-      renderizar(listaGlobal);
-    }
+      if (data.ssl && !data.ssl.error) {
+        document.getElementById('ssl-status').innerText = data.ssl.version + ' (' + data.ssl.cipher_bits + ' bits)';
+        document.getElementById('ssl-exp').innerText = 'Expira em: ' + data.ssl.notAfter;
+      } else {
+        document.getElementById('ssl-status').innerText = 'Falha/Não Seguro';
+        document.getElementById('ssl-exp').innerText = data.ssl ? data.ssl.error : 'Sem SSL';
+      }
 
-    function renderizar(arr) {
-      const container = document.getElementById('lista-falhas');
-      container.innerHTML = '';
-      arr.forEach(item => {
-        container.innerHTML += `
-          <div class="p-5 rounded-xl border ${item.badge} bg-slate-950/40 space-y-2">
+      // 2. Aba Headers
+      const listHeaders = document.getElementById('lista-headers');
+      listHeaders.innerHTML = '';
+      (data.headers || []).forEach(h => {
+        const pass = h.status === 'PASS';
+        listHeaders.innerHTML += `
+          <div class="p-4 rounded-xl border ${pass ? 'border-emerald-500/30 bg-emerald-950/10' : 'border-rose-500/30 bg-rose-950/10'} space-y-1">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2.5 py-0.5 rounded uppercase bg-slate-900 border border-slate-700">${item.nivel}</span>
-              <span class="text-xs text-slate-400 font-mono">[${item.cat}]</span>
+              <span class="font-bold text-sm text-white">${h.title}</span>
+              <span class="text-xs font-bold px-2 py-0.5 rounded ${pass ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${h.status}</span>
             </div>
-            <h4 class="font-semibold text-white text-base">${item.titulo}</h4>
-            <p class="text-sm text-slate-300">${item.desc}</p>
-            <div class="pt-2 border-t border-slate-800/60 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-              <div><strong class="text-rose-400">Risco:</strong> <span class="text-slate-400">${item.impacto}</span></div>
-              <div><strong class="text-emerald-400">Correção:</strong> <span class="text-slate-400">${item.fix}</span></div>
+            <p class="text-xs text-slate-300">${h.detail}</p>
+            <div class="text-xs text-slate-400 pt-1 border-t border-slate-800">
+              <strong>Recomendação:</strong> <code>${h.recommendation}</code>
             </div>
           </div>
         `;
       });
-    }
 
-    function filtrarCat(c) {
-      if(c === 'TODOS') {
-        renderizar(listaGlobal);
+      // 3. Aba SSL
+      const boxSsl = document.getElementById('conteudo-ssl');
+      if (data.ssl && !data.ssl.error) {
+        boxSsl.innerHTML = `
+          <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+            <p><strong>Host:</strong> ${data.ssl.hostname}</p>
+            <p><strong>Protocolo:</strong> ${data.ssl.version}</p>
+            <p><strong>Cifra:</strong> ${data.ssl.cipher} (${data.ssl.cipher_bits} bits)</p>
+            <p><strong>Validade até:</strong> ${data.ssl.notAfter}</p>
+            <p><strong>Emissor (CA):</strong> ${data.ssl.issuer?.commonName || 'N/A'}</p>
+          </div>
+        `;
       } else {
-        renderizar(listaGlobal.filter(x => x.cat === c));
+        boxSsl.innerHTML = `<p class="text-rose-400">Não foi possível auditar o certificado SSL/TLS: ${data.ssl?.error || 'Desconhecido'}</p>`;
       }
+
+      // 4. Aba Fuzzing
+      const boxFuzz = document.getElementById('conteudo-fuzz');
+      boxFuzz.innerHTML = '';
+      if (data.fuzzing && data.fuzzing.length > 0) {
+        data.fuzzing.forEach(r => {
+          boxFuzz.innerHTML += `<div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800 text-emerald-400">${r}</div>`;
+        });
+      } else {
+        boxFuzz.innerHTML = `<p class="text-slate-400">Nenhum diretório padrão exposto ou vulnerável encontrado.</p>`;
+      }
+
+      // 5. Aba Vulnerabilidades
+      const boxVuln = document.getElementById('conteudo-vuln');
+      boxVuln.innerHTML = '';
+      if (data.vulnerabilidades && data.vulnerabilidades.length > 0) {
+        data.vulnerabilidades.forEach(v => {
+          const isVuln = v.Status.includes('Vulnerável');
+          boxVuln.innerHTML += `
+            <div class="p-3 rounded-lg border ${isVuln ? 'border-rose-500/40 bg-rose-950/20' : 'border-slate-800 bg-slate-950'} flex items-center justify-between text-xs">
+              <div>
+                <span class="font-bold text-slate-200">[${v.Categoria.toUpperCase()}]</span>
+                <code class="ml-2 text-slate-300">${v.Payload}</code>
+              </div>
+              <span class="font-bold ${isVuln ? 'text-rose-400' : 'text-emerald-400'}">${v.Status}</span>
+            </div>
+          `;
+        });
+      } else {
+        boxVuln.innerHTML = `<p class="text-slate-400">Nenhuma anomalia de injeção identificada nos testes rápidos.</p>`;
+      }
+
+      lucide.createIcons();
     }
   </script>
 </body>
