@@ -1,0 +1,33 @@
+name: Security Audit & QA CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install bandit
+
+      - name: Run Pytest Suite
+        run: |
+          pytest -v
+
+      - name: Run SAST Security Scan (Bandit)
+        run: |
+          bandit -r . -x ./venv,./.venv,./test_rotina.py,./test_auditor.py -ll || true
