@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Pentest Dashboard - Hub de Ferramentas</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #fff; margin: 40px; }
+        .container { max-width: 900px; margin: auto; background: #16213e; padding: 30px; border-radius: 15px; }
+        h1 { color: #4ecca3; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px; }
+        .card { background: #0f3460; padding: 20px; border-radius: 10px; border: 1px solid #4ecca3; text-align: center; }
+        code { background: #000; padding: 5px; border-radius: 4px; color: #4ecca3; display: block; margin-top: 10px; }
+        .report-link { color: #fff; text-decoration: none; display: block; margin-top: 10px; padding: 10px; background: #4ecca3; color: #1a1a2e; font-weight: bold; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pentest Dashboard</h1>
+        <p style="text-align: center;">Hub de consulta e acesso rápido aos seus relatórios e ferramentas.</p>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Fuzzer de Diretórios</h3>
+                <p>Busca pastas ocultas usando wordlist.json.</p>
+                <code>python fuzzer_moderno.py</code>
+            </div>
+            <div class="card">
+                <h3>Scanner Vulnerabilidades</h3>
+                <p>Varredura XSS/SQLi com relatório.</p>
+                <code>python scanner_visual.py</code>
+                <a href="relatorio_seguranca.html" class="report-link">Ver Relatório</a>
+            </div>
+            <div class="card">
+                <h3>Auditor SSL/TLS</h3>
+                <p>Verificação de criptografia do host.</p>
+                <code>python auditor_ssl.py</code>
+                <a href="relatorio_ssl.html" class="report-link">Ver Relatório</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

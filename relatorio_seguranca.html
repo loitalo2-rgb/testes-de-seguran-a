@@ -1,0 +1,69 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Relatório de Pentest</title>
+        <style>
+            body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 40px; background: #f0f2f5; }
+            h1 { color: #2c3e50; }
+            table { border-collapse: collapse; width: 100%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+            th, td { padding: 15px; border: 1px solid #ddd; text-align: left; }
+            th { background-color: #34495e; color: white; }
+            .vulneravel { background-color: #ff7675; color: white; font-weight: bold; }
+            .seguro { color: #27ae60; }
+            code { background: #eee; padding: 2px 4px; border-radius: 4px; }
+        </style>
+    </head>
+    <body>
+        <h1>Relatório de Scan de Vulnerabilidades</h1>
+        <p><b>Data:</b> 2026-11-05 10:15:47</p>
+        <table>
+            <tr><th>URL</th><th>Payload</th><th>Categoria</th><th>Status</th></tr>
+            
+        <tr>
+            <td>https://diskentulho.fun/?id=' OR 1=1 --</td>
+            <td><code>' OR 1=1 --</code></td>
+            <td>sql_injection</td>
+            <td class='seguro'>Seguro</td>
+        </tr>
+        <tr>
+            <td>https://diskentulho.fun/?id=' UNION SELECT NULL, NULL --</td>
+            <td><code>' UNION SELECT NULL, NULL --</code></td>
+            <td>sql_injection</td>
+            <td class='seguro'>Seguro</td>
+        </tr>
+        <tr>
+            <td>https://diskentulho.fun/?id=admin' --</td>
+            <td><code>admin' --</code></td>
+            <td>sql_injection</td>
+            <td class='seguro'>Seguro</td>
+        </tr>
+        <tr>
+            <td>https://diskentulho.fun/?id=" OR "1"="1"</td>
+            <td><code>" OR "1"="1"</code></td>
+            <td>sql_injection</td>
+            <td class='seguro'>Seguro</td>
+        </tr>
+        <tr>
+            <td>https://diskentulho.fun/?id=<script>alert('XSS')</script></td>
+            <td><code><script>alert('XSS')</script></code></td>
+            <td>xss</td>
+            <td class='seguro'>Seguro</td>
+        </tr>
+        <tr>
+            <td>https://diskentulho.fun/?id=<img src=x onerror=alert(1)></td>
+            <td><code><img src=x onerror=alert(1)></code></td>
+            <td>xss</td>
+            <td class='seguro'>Seguro</td>
+        </tr>
+        <tr>
+            <td>https://diskentulho.fun/?id=javascript:alert(1)</td>
+            <td><code>javascript:alert(1)</code></td>
+            <td>xss</td>
+            <td class='seguro'>Seguro</td>
+        </tr>
+        </table>
+    </body>
+    </html>
+    
