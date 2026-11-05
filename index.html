@@ -525,19 +525,33 @@
       boxSens.innerHTML = '';
       if (data.sensitive_files && data.sensitive_files.length > 0) {
         data.sensitive_files.forEach(s => {
+          let previewHtml = '';
+          if (s.preview) {
+            previewHtml = `
+              <div class="mt-2 p-2.5 bg-slate-900 border border-rose-500/30 rounded font-mono text-xs text-rose-300">
+                <span class="text-slate-400 font-semibold select-none">Prévia do Conteúdo Detectado:</span><br/>
+                <code>${s.preview.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code>
+              </div>
+            `;
+          }
           boxSens.innerHTML += `
             <div class="p-4 rounded-xl border border-rose-500/40 bg-rose-950/20 space-y-1">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-rose-400">${s.description}</span>
+                <span class="font-bold text-rose-400 flex items-center gap-2">
+                  <i data-lucide="key-round" class="w-4 h-4"></i> ${s.description}
+                </span>
                 <span class="text-xs font-bold px-2 py-0.5 rounded bg-rose-500 text-white uppercase">${s.severity}</span>
               </div>
-              <p class="text-xs font-mono text-slate-200">${s.url}</p>
-              <p class="text-xs text-rose-300">Atenção: Arquivo de configuração ou repositório exposto publicamente!</p>
+              <p class="text-xs font-mono text-slate-200">
+                <a href="${s.url}" target="_blank" class="hover:underline text-rose-300">${s.url}</a>
+              </p>
+              ${previewHtml}
+              <p class="text-xs text-rose-400/80 pt-1">Risco Imediato: Arquivo com senhas, credenciais ou configurações confidenciais acessível sem autenticação!</p>
             </div>
           `;
         });
       } else {
-        boxSens.innerHTML = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400">✓ Nenhum arquivo sensível (.env, .git, backups de banco de dados) foi detectado na raiz da aplicação.</div>`;
+        boxSens.innerHTML = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400">✓ Nenhum arquivo de credenciais (senhas.txt, passwords.txt) ou configurações (.env, .git, dumps) foi detectado na raiz da aplicação.</div>`;
       }
 
       // 7. Aba Portas
