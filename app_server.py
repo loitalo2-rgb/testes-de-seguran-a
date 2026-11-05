@@ -52,6 +52,7 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 data = json.loads(post_data.decode('utf-8'))
                 target_url = data.get('url', '').strip()
+                nmap_mode = data.get('nmap_mode', 'fast') # fast, advanced ou deep
             except Exception:
                 self.send_response(400)
                 self.end_headers()
@@ -70,7 +71,7 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             parsed = urllib.parse.urlparse(target_url)
             hostname = parsed.hostname or target_url
 
-            print(f"\n[+] Executando Auditoria Global Integrada em: {target_url}...")
+            print(f"\n[+] Executando Auditoria Global [{nmap_mode.upper()}] em: {target_url}...")
 
             # 1. Auditoria Defensiva de Headers OWASP
             auditor = SecurityHeaderAuditor(target_url)
@@ -102,8 +103,8 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             # 7. Scanner de Arquivos Sensíveis (.git, .env, backups)
             sensitive_findings = check_sensitive_files(target_url)
 
-            # 8. Auditoria com Nmap (ou Fallback Nativo)
-            nmap_res = run_nmap_scan(hostname)
+            # 8. Auditoria com Nmap (Modo escolhido: fast, advanced ou deep)
+            nmap_res = run_nmap_scan(hostname, mode=nmap_mode)
 
             # 9. Scanner Rápido de Portas / Serviços Expostos
             open_ports = scan_ports(hostname)
@@ -171,7 +172,7 @@ def run_server():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), PentestHandler) as httpd:
         print("="*60)
-        print(f"🚀 PAINEL DE CONTROLE DE SEGURANÇA UNIFICADO COM NMAP!")
+        print(f"🚀 PAINEL DE CONTROLE DE SEGURANÇA UNIFICADO COM 3 MODOS NMAP!")
         print(f"👉 Acesse no seu navegador: http://localhost:{PORT}")
         print("="*60)
         try:

@@ -18,7 +18,7 @@
         </div>
         <div>
           <h1 class="text-2xl font-bold tracking-tight">Security Suite <span class="text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-full ml-2">All-In-One + Nmap</span></h1>
-          <p class="text-sm text-slate-400">Auditoria integrada: Headers, Nmap, Portas, SSL, DNS, Cookies, Arquivos Sensíveis e Fuzzing</p>
+          <p class="text-sm text-slate-400">Auditoria completa com seleção de perfil Nmap (Rápido, Avançado ou Profundo)</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
@@ -31,44 +31,86 @@
       </div>
     </header>
 
-    <!-- URL Input & Action -->
-    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-2xl mb-8">
-      <div class="flex flex-col gap-4">
-        <label for="url-input" class="block text-sm font-semibold text-slate-300">
-          Endereço do Alvo para Auditoria Geral:
+    <!-- URL Input & Profile Selector -->
+    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-2xl mb-8 space-y-6">
+      <div>
+        <label for="url-input" class="block text-sm font-semibold text-slate-300 mb-2">
+          Endereço do Alvo para Auditoria:
         </label>
-        <div class="flex flex-col sm:flex-row gap-3">
-          <div class="relative flex-1">
-            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-              <i data-lucide="globe" class="w-5 h-5"></i>
-            </div>
-            <input 
-              id="url-input" 
-              type="text" 
-              placeholder="ex: https://example.com ou https://google.com" 
-              value="https://example.com" 
-              class="w-full bg-slate-950 border border-slate-700/80 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500 transition"
-            />
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+            <i data-lucide="globe" class="w-5 h-5"></i>
           </div>
-          <button 
-            onclick="executarScanGeral()" 
-            id="btn-analisar"
-            class="bg-gradient-to-r from-rose-600 to-indigo-600 hover:opacity-90 text-white font-semibold px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 transition-all active:scale-95"
-          >
-            <i data-lucide="play" class="w-5 h-5 fill-current"></i> Analisar Tudo Automaticamente
-          </button>
+          <input 
+            id="url-input" 
+            type="text" 
+            placeholder="ex: https://example.com ou https://google.com" 
+            value="https://example.com" 
+            class="w-full bg-slate-950 border border-slate-700/80 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500 transition"
+          />
         </div>
+      </div>
 
-        <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800 text-xs text-slate-400">
-          <span class="font-medium text-slate-300">Motores Ativos:</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Nmap / Socket Scanner</span>
+      <!-- Seletor dos 3 Modos do Nmap -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+          <i data-lucide="sliders" class="w-4 h-4 text-rose-400"></i> Escolha o Nível de Profundidade da Varredura Nmap:
+        </label>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Modo 1: Rápido -->
+          <label class="cursor-pointer">
+            <input type="radio" name="nmap-mode" value="fast" checked class="peer sr-only">
+            <div class="p-4 rounded-xl border border-slate-700 bg-slate-950 peer-checked:border-emerald-500 peer-checked:bg-emerald-950/20 transition hover:border-slate-600 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-sm text-emerald-400 flex items-center gap-1.5"><i data-lucide="zap" class="w-4 h-4"></i> Modo Rápido</span>
+                <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">~10 seg</span>
+              </div>
+              <p class="text-xs text-slate-400">Varre as Top 100 portas mais comuns e identifica versões de serviços (-F -sV).</p>
+            </div>
+          </label>
+
+          <!-- Modo 2: Avançado -->
+          <label class="cursor-pointer">
+            <input type="radio" name="nmap-mode" value="advanced" class="peer sr-only">
+            <div class="p-4 rounded-xl border border-slate-700 bg-slate-950 peer-checked:border-amber-500 peer-checked:bg-amber-950/20 transition hover:border-slate-600 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-sm text-amber-400 flex items-center gap-1.5"><i data-lucide="shield-alert" class="w-4 h-4"></i> Modo Avançado</span>
+                <span class="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-mono">~30-60 seg</span>
+              </div>
+              <p class="text-xs text-slate-400">Top 1.000 portas padrão + execução de scripts de enumeração do Nmap (-sV -sC).</p>
+            </div>
+          </label>
+
+          <!-- Modo 3: Profundo -->
+          <label class="cursor-pointer">
+            <input type="radio" name="nmap-mode" value="deep" class="peer sr-only">
+            <div class="p-4 rounded-xl border border-slate-700 bg-slate-950 peer-checked:border-rose-500 peer-checked:bg-rose-950/20 transition hover:border-slate-600 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-sm text-rose-400 flex items-center gap-1.5"><i data-lucide="flame" class="w-4 h-4"></i> Modo Profundo</span>
+                <span class="text-xs bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-mono">~2-4 min</span>
+              </div>
+              <p class="text-xs text-slate-400">Top 5.000 portas + detecção avançada de Sistema Operacional (-A agressivo).</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Botão de Ação -->
+      <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800">
+        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+          <span class="font-medium text-slate-300">Inclui:</span>
           <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> OWASP Headers</span>
           <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Arquivos (.env/.git)</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> DNS (SPF/DMARC)</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> SSL/TLS</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Cookies</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> SSL/TLS & DNS</span>
           <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Fuzzing & SQLi/XSS</span>
         </div>
+        <button 
+          onclick="executarScanGeral()" 
+          id="btn-analisar"
+          class="w-full sm:w-auto bg-gradient-to-r from-rose-600 to-indigo-600 hover:opacity-90 text-white font-semibold px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 transition-all active:scale-95"
+        >
+          <i data-lucide="play" class="w-5 h-5 fill-current"></i> Iniciar Varredura Completa
+        </button>
       </div>
     </div>
 
@@ -79,9 +121,9 @@
           <div class="animate-spin text-rose-400">
             <i data-lucide="loader-2" class="w-6 h-6"></i>
           </div>
-          <h3 class="font-semibold text-slate-200" id="loader-status">Executando motor Nmap, analisando portas, headers, SSL e rotas...</h3>
+          <h3 class="font-semibold text-slate-200" id="loader-status">Executando Nmap e módulos de segurança...</h3>
         </div>
-        <span class="text-xs font-mono text-rose-400">Varredura Global Ativa</span>
+        <span class="text-xs font-mono text-rose-400" id="loader-mode-badge">Processando</span>
       </div>
       <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
         <div class="bg-gradient-to-r from-rose-500 to-indigo-500 h-full w-4/5 animate-pulse"></div>
@@ -148,9 +190,12 @@
 
       <!-- Conteúdo Aba 1: Nmap -->
       <div id="tab-nmap" class="tab-content bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="terminal" class="text-rose-400"></i> Auditoria de Rede via Nmap</h3>
-          <span id="nmap-engine-badge" class="text-xs font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300">Carregando motor...</span>
+          <div class="flex items-center gap-2">
+            <span id="nmap-mode-label" class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-800 text-slate-300">Modo</span>
+            <span id="nmap-engine-badge" class="text-xs font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300">Carregando motor...</span>
+          </div>
         </div>
         <div id="conteudo-nmap" class="space-y-3 text-sm"></div>
       </div>
@@ -292,15 +337,20 @@
         return;
       }
 
+      const selectedMode = document.querySelector('input[name="nmap-mode"]:checked')?.value || 'fast';
+
       document.getElementById('resultados').classList.add('hidden');
       document.getElementById('loader').classList.remove('hidden');
       document.getElementById('btn-analisar').disabled = true;
+
+      const modeNames = { fast: 'Modo Rápido (~10s)', advanced: 'Modo Avançado (~30-60s)', deep: 'Modo Profundo (~2-4m)' };
+      document.getElementById('loader-mode-badge').innerText = modeNames[selectedMode] || 'Processando';
 
       try {
         const response = await fetch('/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url })
+          body: JSON.stringify({ url: url, nmap_mode: selectedMode })
         });
 
         if (!response.ok) throw new Error('Falha na resposta do servidor');
@@ -339,13 +389,20 @@
       // 2. Aba Nmap
       const boxNmap = document.getElementById('conteudo-nmap');
       const badgeNmap = document.getElementById('nmap-engine-badge');
+      const labelNmap = document.getElementById('nmap-mode-label');
       if (data.nmap) {
         badgeNmap.innerText = data.nmap.engine;
         badgeNmap.className = 'text-xs font-bold px-2.5 py-1 rounded ' + (data.nmap.installed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300');
-        
+        labelNmap.innerText = data.nmap.mode_label || data.nmap.mode;
+
         let nmapHtml = '';
-        if (data.nmap.tip) {
-          nmapHtml += `<div class="p-3 bg-amber-950/20 border border-amber-500/30 rounded-xl text-xs text-amber-300">${data.nmap.tip}</div>`;
+        if (data.nmap.os_detected && data.nmap.os_detected !== 'Não determinado') {
+          nmapHtml += `
+            <div class="p-3 bg-indigo-950/30 border border-indigo-500/30 rounded-xl text-xs text-indigo-300 flex items-center gap-2">
+              <i data-lucide="cpu" class="w-4 h-4 text-indigo-400"></i>
+              <span><strong>Sistema Operacional Estimado:</strong> ${data.nmap.os_detected}</span>
+            </div>
+          `;
         }
 
         if (data.nmap.ports && data.nmap.ports.length > 0) {
@@ -363,13 +420,13 @@
           });
           nmapHtml += '</div>';
         } else {
-          nmapHtml += '<p class="text-slate-400">Nenhuma porta aberta detectada na varredura Nmap.</p>';
+          nmapHtml += '<p class="text-slate-400">Nenhuma porta aberta detectada no escopo desta varredura.</p>';
         }
 
         if (data.nmap.raw_output) {
           nmapHtml += `
             <details class="pt-2 text-xs">
-              <summary class="cursor-pointer text-slate-400 hover:text-white">Ver saída bruta do Nmap</summary>
+              <summary class="cursor-pointer text-slate-400 hover:text-white">Ver saída de terminal do Nmap (Comando: ${data.nmap.command || 'N/A'})</summary>
               <pre class="mt-2 p-3 bg-slate-950 border border-slate-800 rounded-lg font-mono text-slate-300 overflow-x-auto whitespace-pre-wrap">${data.nmap.raw_output}</pre>
             </details>
           `;
