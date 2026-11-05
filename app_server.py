@@ -11,6 +11,7 @@ from auditor_ssl import get_ssl_info
 import fuzzer_moderno
 import scanner_visual
 from auditor_recon_dns import check_dns_email_security, inspect_recon_files, inspect_cookies_privacy
+from auditor_avancado import scan_ports, check_sensitive_files, detect_js_libraries, save_scan_history
 
 PORT = 5000
 
@@ -24,6 +25,23 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
         self.end_headers()
+
+    def do_GET(self):
+        if self.path == '/api/history':
+            history_file = "historico_scans.json"
+            history = []
+            if os.path.exists(history_file):
+                try:
+                    with open(history_file, 'r', encoding='utf-8') as f:
+                        history = json.load(f)
+                except Exception:
+                    pass
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(history, ensure_ascii=False).encode('utf-8'))
+        else:
+            super().do_GET()
 
     def do_POST(self):
         if self.path == '/api/scan':
@@ -66,16 +84,27 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             # 4. Reconhecimento de Robots.txt e Sitemap.xml
             recon_res = inspect_recon_files(target_url)
 
-            # 5. Auditoria de Cookies da URL
+            # 5. Auditoria de Cookies da URL e Captura do HTML
             raw_cookies = []
+            html_body = ""
             try:
                 c_resp = requests.get(target_url, timeout=5, headers={"User-Agent": "Mozilla/5.0"})
                 raw_cookies = c_resp.cookies
+                html_body = c_resp.text
             except Exception:
                 pass
             cookies_res = inspect_cookies_privacy(raw_cookies, target_url)
 
-            # 6. Fuzzing Rápido de Rotas
+            # 6. Detecção de Componentes Frontend (JS Libraries)
+            js_libs = detect_js_libraries(html_body)
+
+            # 7. Scanner de Arquivos Sensíveis (.git, .env, backups)
+            sensitive_findings = check_sensitive_files(target_url)
+
+            # 8. Scanner Rápido de Portas / Serviços Expostos
+            open_ports = scan_ports(hostname)
+
+            # 9. Fuzzing Rápido de Rotas
             top_paths = ["admin", "login", "api", "dashboard", ".env", "config.json", "wp-admin", "robots.txt", "swagger", "backup.zip"]
             fuzz_results = []
             for path in top_paths:
@@ -84,7 +113,7 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 if res:
                     fuzz_results.append(res)
 
-            # 7. Scanner de Vulnerabilidades (XSS e SQLi)
+            # 10. Scanner de Vulnerabilidades (XSS e SQLi)
             payloads = scanner_visual.load_payloads("payloads.json")
             vuln_results = []
             if payloads:
@@ -94,17 +123,20 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             criticos = sum(1 for f in auditor.findings if f['status'] == 'FAIL' and f['severity'] == 'Alta')
             medios = sum(1 for f in auditor.findings if f['status'] == 'FAIL' and f['severity'] == 'Média')
             criticos += sum(1 for v in vuln_results if 'Vulnerável' in v.get('Status', ''))
-            
-            # Penalidade se não possuir SPF ou DMARC
+            criticos += len(sensitive_findings) # Cada arquivo sensível exposto é crítico
+
             if dns_res["spf"]["status"] == "FAIL":
                 medios += 1
             if dns_res["dmarc"]["status"] == "FAIL":
                 medios += 1
 
+            # Penalidade de score para arquivos sensíveis
+            final_score = max(0, auditor.score - (len(sensitive_findings) * 20))
+
             response_payload = {
                 "target": target_url,
                 "hostname": hostname,
-                "score": auditor.score,
+                "score": final_score,
                 "criticos": criticos,
                 "medios": medios,
                 "headers": auditor.findings,
@@ -113,9 +145,15 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 "dns": dns_res,
                 "recon": recon_res,
                 "cookies": cookies_res,
+                "sensitive_files": sensitive_findings,
+                "ports": open_ports,
+                "js_libraries": js_libs,
                 "fuzzing": fuzz_results,
                 "vulnerabilidades": vuln_results
             }
+
+            # Salvar no histórico
+            save_scan_history(response_payload)
 
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')

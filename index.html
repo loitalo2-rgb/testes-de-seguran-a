@@ -17,8 +17,8 @@
           <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
         </div>
         <div>
-          <h1 class="text-2xl font-bold tracking-tight">Security Suite <span class="text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-full ml-2">All-In-One Pro</span></h1>
-          <p class="text-sm text-slate-400">Insira a URL: auditoria de Headers, SSL, DNS/Anti-Spoofing, Robots/Sitemap, Cookies e Injeção</p>
+          <h1 class="text-2xl font-bold tracking-tight">Security Suite <span class="text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-full ml-2">Enterprise All-In-One</span></h1>
+          <p class="text-sm text-slate-400">Insira a URL: auditoria de Headers, SSL, DNS, Robots/Sitemap, Cookies, Arquivos Sensíveis, Portas e Bibliotecas</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
@@ -35,7 +35,7 @@
     <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-2xl mb-8">
       <div class="flex flex-col gap-4">
         <label for="url-input" class="block text-sm font-semibold text-slate-300">
-          Endereço do Alvo para Análise Completa:
+          Endereço do Alvo para Auditoria Geral:
         </label>
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="relative flex-1">
@@ -60,12 +60,14 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800 text-xs text-slate-400">
-          <span class="font-medium text-slate-300">Módulos Ativos:</span>
+          <span class="font-medium text-slate-300">Módulos:</span>
           <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> OWASP Headers</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> SSL / TLS</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Arquivos Sensíveis (.env/.git)</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Portas & Serviços</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Bibliotecas JS</span>
           <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> DNS (SPF/DMARC)</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Robots & Sitemap</span>
-          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Cookies & Privacidade</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> SSL/TLS</span>
+          <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Cookies</span>
           <span class="text-rose-400 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Fuzzing & SQLi/XSS</span>
         </div>
       </div>
@@ -78,12 +80,12 @@
           <div class="animate-spin text-rose-400">
             <i data-lucide="loader-2" class="w-6 h-6"></i>
           </div>
-          <h3 class="font-semibold text-slate-200" id="loader-status">Consultando DNS, Headers, SSL e Rotas do Alvo...</h3>
+          <h3 class="font-semibold text-slate-200" id="loader-status">Consultando DNS, Portas, Headers, Arquivos Sensíveis e SSL...</h3>
         </div>
-        <span class="text-xs font-mono text-rose-400">Processando</span>
+        <span class="text-xs font-mono text-rose-400">Auditoria em Andamento</span>
       </div>
       <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
-        <div class="bg-gradient-to-r from-rose-500 to-indigo-500 h-full w-2/3 animate-pulse"></div>
+        <div class="bg-gradient-to-r from-rose-500 to-indigo-500 h-full w-3/4 animate-pulse"></div>
       </div>
     </div>
 
@@ -94,11 +96,11 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
           <div class="flex items-center justify-between text-slate-400 text-sm">
-            <span>Score de Segurança</span>
+            <span>Score Geral</span>
             <i data-lucide="shield" class="w-4 h-4 text-emerald-400"></i>
           </div>
           <div class="text-3xl font-extrabold mt-2" id="score-val">0/100</div>
-          <p class="text-xs text-slate-400 mt-1" id="score-desc">Avaliação baseada no OWASP</p>
+          <p class="text-xs text-slate-400 mt-1" id="score-desc">Avaliação global consolidada</p>
         </div>
 
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
@@ -107,7 +109,7 @@
             <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500"></i>
           </div>
           <div class="text-3xl font-extrabold text-rose-500 mt-2" id="criticos-val">0</div>
-          <p class="text-xs text-slate-400 mt-1">Requer ação corretiva</p>
+          <p class="text-xs text-slate-400 mt-1">Requer ação corretiva imediata</p>
         </div>
 
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
@@ -116,7 +118,7 @@
             <i data-lucide="info" class="w-4 h-4 text-amber-400"></i>
           </div>
           <div class="text-3xl font-extrabold text-amber-400 mt-2" id="medios-val">0</div>
-          <p class="text-xs text-slate-400 mt-1">Pontos de melhoria</p>
+          <p class="text-xs text-slate-400 mt-1">Melhorias e boas práticas</p>
         </div>
 
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
@@ -129,57 +131,85 @@
         </div>
       </div>
 
-      <!-- Abas de Navegação dos Módulos -->
+      <!-- Abas de Navegação -->
       <div class="flex flex-wrap border-b border-slate-800 gap-2">
-        <button onclick="mudarAba('tab-headers')" id="btn-tab-headers" class="tab-btn px-4 py-2.5 text-sm font-semibold text-rose-400 border-b-2 border-rose-500">Cabeçalhos HTTP (OWASP)</button>
+        <button onclick="mudarAba('tab-headers')" id="btn-tab-headers" class="tab-btn px-4 py-2.5 text-sm font-semibold text-rose-400 border-b-2 border-rose-500">Headers OWASP</button>
+        <button onclick="mudarAba('tab-sensitive')" id="btn-tab-sensitive" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Arquivos Sensíveis (.env/.git)</button>
+        <button onclick="mudarAba('tab-ports')" id="btn-tab-ports" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Portas & Serviços</button>
+        <button onclick="mudarAba('tab-libs')" id="btn-tab-libs" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Bibliotecas JS</button>
         <button onclick="mudarAba('tab-dns')" id="btn-tab-dns" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">DNS & Anti-Spoofing</button>
-        <button onclick="mudarAba('tab-recon')" id="btn-tab-recon" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Robots.txt & Sitemap</button>
-        <button onclick="mudarAba('tab-cookies')" id="btn-tab-cookies" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Cookies & Privacidade</button>
-        <button onclick="mudarAba('tab-ssl')" id="btn-tab-ssl" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Auditoria SSL/TLS</button>
+        <button onclick="mudarAba('tab-recon')" id="btn-tab-recon" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Robots & Sitemap</button>
+        <button onclick="mudarAba('tab-cookies')" id="btn-tab-cookies" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Cookies</button>
+        <button onclick="mudarAba('tab-ssl')" id="btn-tab-ssl" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">SSL/TLS</button>
         <button onclick="mudarAba('tab-fuzz')" id="btn-tab-fuzz" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Rotas (Fuzzing)</button>
-        <button onclick="mudarAba('tab-vuln')" id="btn-tab-vuln" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Injeções (XSS/SQLi)</button>
+        <button onclick="mudarAba('tab-vuln')" id="btn-tab-vuln" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Injeções</button>
+        <button onclick="mudarAba('tab-history')" id="btn-tab-history" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Histórico</button>
       </div>
 
       <!-- Conteúdo Aba 1: Headers -->
       <div id="tab-headers" class="tab-content bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
-        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="list-checks" class="text-rose-400"></i> Cabeçalhos de Segurança HTTP</h3>
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="list-checks" class="text-rose-400"></i> Cabeçalhos de Segurança HTTP (OWASP)</h3>
         <div class="space-y-3" id="lista-headers"></div>
       </div>
 
-      <!-- Conteúdo Aba 2: DNS & Anti-Spoofing -->
+      <!-- Conteúdo Aba 2: Arquivos Sensíveis -->
+      <div id="tab-sensitive" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="file-warning" class="text-rose-400"></i> Verificação de Arquivos e Backups Expostos (.env, .git, dumps)</h3>
+        <div id="conteudo-sensitive" class="space-y-3 text-sm"></div>
+      </div>
+
+      <!-- Conteúdo Aba 3: Portas & Serviços -->
+      <div id="tab-ports" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="radio" class="text-emerald-400"></i> Portas Abertas e Serviços Detectados</h3>
+        <div id="conteudo-ports" class="space-y-3 text-sm"></div>
+      </div>
+
+      <!-- Conteúdo Aba 4: Bibliotecas JS -->
+      <div id="tab-libs" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="layers" class="text-sky-400"></i> Componentes Frontend e Bibliotecas JavaScript</h3>
+        <div id="conteudo-libs" class="space-y-3 text-sm"></div>
+      </div>
+
+      <!-- Conteúdo Aba 5: DNS & Anti-Spoofing -->
       <div id="tab-dns" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
-        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="network" class="text-blue-400"></i> Registros de DNS e Proteção contra Forjamento de E-mail</h3>
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="network" class="text-blue-400"></i> Registros de DNS e Proteção de E-mail</h3>
         <div id="conteudo-dns" class="space-y-4 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 3: Reconhecimento Robots / Sitemap -->
+      <!-- Conteúdo Aba 6: Reconhecimento Robots / Sitemap -->
       <div id="tab-recon" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="compass" class="text-amber-400"></i> Mapeamento de /robots.txt e /sitemap.xml</h3>
         <div id="conteudo-recon" class="space-y-4 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 4: Cookies & Privacidade -->
+      <!-- Conteúdo Aba 7: Cookies & Privacidade -->
       <div id="tab-cookies" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
-        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="cookie" class="text-yellow-400"></i> Auditoria de Flags e Segurança de Cookies</h3>
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="cookie" class="text-yellow-400"></i> Flags e Conformidade de Cookies</h3>
         <div id="conteudo-cookies" class="space-y-3 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 5: SSL -->
+      <!-- Conteúdo Aba 8: SSL -->
       <div id="tab-ssl" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="key" class="text-indigo-400"></i> Detalhes da Cifra e Certificado SSL/TLS</h3>
         <div id="conteudo-ssl" class="space-y-2 text-sm"></div>
       </div>
 
-      <!-- Conteúdo Aba 6: Fuzzing -->
+      <!-- Conteúdo Aba 9: Fuzzing -->
       <div id="tab-fuzz" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
-        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="folder-search" class="text-amber-400"></i> Rotas e Diretórios Mapeados</h3>
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="folder-search" class="text-amber-400"></i> Rotas Mapeadas</h3>
         <div id="conteudo-fuzz" class="space-y-2 font-mono text-xs"></div>
       </div>
 
-      <!-- Conteúdo Aba 7: Vulnerabilidades -->
+      <!-- Conteúdo Aba 10: Vulnerabilidades -->
       <div id="tab-vuln" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="bug" class="text-rose-400"></i> Testes de Injeção de Parâmetros</h3>
         <div id="conteudo-vuln" class="space-y-2"></div>
+      </div>
+
+      <!-- Conteúdo Aba 11: Histórico -->
+      <div id="tab-history" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="history" class="text-purple-400"></i> Histórico Local de Varreduras</h3>
+        <div id="conteudo-history" class="space-y-2 text-sm"></div>
       </div>
 
     </div>
@@ -200,6 +230,36 @@
       downloadAnchor.remove();
     }
 
+    async function carregarHistorico() {
+      try {
+        const resp = await fetch('/api/history');
+        if (resp.ok) {
+          const list = await resp.json();
+          const box = document.getElementById('conteudo-history');
+          box.innerHTML = '';
+          if (list.length === 0) {
+            box.innerHTML = '<p class="text-slate-400">Nenhuma varredura anterior registrada.</p>';
+            return;
+          }
+          list.forEach(h => {
+            box.innerHTML += `
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-white">${h.target}</span>
+                  <span class="text-xs text-slate-400 ml-2">(${h.timestamp})</span>
+                </div>
+                <div class="flex items-center gap-3 text-xs">
+                  <span class="font-bold ${h.score >= 70 ? 'text-emerald-400' : 'text-rose-400'}">Score: ${h.score}/100</span>
+                  <span class="text-rose-400">Críticos: ${h.criticos}</span>
+                  <span class="text-amber-400">Médios: ${h.medios}</span>
+                </div>
+              </div>
+            `;
+          });
+        }
+      } catch (e) {}
+    }
+
     function mudarAba(id) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(el => {
@@ -210,6 +270,10 @@
       const activeBtn = document.getElementById('btn-' + id);
       activeBtn.classList.remove('text-slate-400');
       activeBtn.classList.add('text-rose-400', 'border-b-2', 'border-rose-500');
+
+      if (id === 'tab-history') {
+        carregarHistorico();
+      }
     }
 
     async function executarScanGeral() {
@@ -282,7 +346,71 @@
         `;
       });
 
-      // 3. Aba DNS & Anti-Spoofing
+      // 3. Aba Arquivos Sensíveis
+      const boxSens = document.getElementById('conteudo-sensitive');
+      boxSens.innerHTML = '';
+      if (data.sensitive_files && data.sensitive_files.length > 0) {
+        data.sensitive_files.forEach(s => {
+          boxSens.innerHTML += `
+            <div class="p-4 rounded-xl border border-rose-500/40 bg-rose-950/20 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-rose-400">${s.description}</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-rose-500 text-white uppercase">${s.severity}</span>
+              </div>
+              <p class="text-xs font-mono text-slate-200">${s.url}</p>
+              <p class="text-xs text-rose-300">Atenção: Arquivo de configuração ou repositório exposto publicamente!</p>
+            </div>
+          `;
+        });
+      } else {
+        boxSens.innerHTML = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400">✓ Nenhum arquivo sensível (.env, .git, backups de banco de dados) foi detectado na raiz da aplicação.</div>`;
+      }
+
+      // 4. Aba Portas
+      const boxPorts = document.getElementById('conteudo-ports');
+      boxPorts.innerHTML = '';
+      if (data.ports && data.ports.length > 0) {
+        let portsList = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">';
+        data.ports.forEach(p => {
+          portsList += `
+            <div class="p-3 bg-slate-950 rounded-xl border border-emerald-500/30 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-emerald-400">Porta ${p.port}</span>
+                <p class="text-xs text-slate-400">${p.service}</p>
+              </div>
+              <span class="text-xs font-bold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded">ABERTA</span>
+            </div>
+          `;
+        });
+        portsList += '</div>';
+        boxPorts.innerHTML = portsList;
+      } else {
+        boxPorts.innerHTML = `<p class="text-slate-400">Nenhuma porta comum de banco ou dev aberta diretamente para a internet.</p>`;
+      }
+
+      // 5. Aba Bibliotecas JS
+      const boxLibs = document.getElementById('conteudo-libs');
+      boxLibs.innerHTML = '';
+      if (data.js_libraries && data.js_libraries.length > 0) {
+        let libsList = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">';
+        data.js_libraries.forEach(l => {
+          libsList += `
+            <div class="p-3 bg-slate-950 rounded-xl border border-sky-500/30 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-sky-300">${l.name}</span>
+                <p class="text-xs text-slate-400">Versão: ${l.version}</p>
+              </div>
+              <span class="text-xs font-bold text-sky-400 bg-sky-500/20 px-2 py-0.5 rounded">Detectado</span>
+            </div>
+          `;
+        });
+        libsList += '</div>';
+        boxLibs.innerHTML = libsList;
+      } else {
+        boxLibs.innerHTML = `<p class="text-slate-400">Nenhuma biblioteca frontend comum identificada no HTML base.</p>`;
+      }
+
+      // 6. Aba DNS
       const boxDns = document.getElementById('conteudo-dns');
       const spfPass = data.dns?.spf?.status === 'PASS';
       const dmarcPass = data.dns?.dmarc?.status === 'PASS';
@@ -313,7 +441,7 @@
         </div>
       `;
 
-      // 4. Aba Recon (Robots e Sitemap)
+      // 7. Aba Recon
       const boxRecon = document.getElementById('conteudo-recon');
       const r = data.recon;
       boxRecon.innerHTML = `
@@ -323,7 +451,7 @@
               <strong>Arquivo /robots.txt</strong>
               <span class="text-xs font-bold px-2 py-0.5 rounded ${r?.robots?.found ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${r?.robots?.found ? 'ENCONTRADO' : 'NÃO DETECTADO'}</span>
             </div>
-            <p class="text-xs text-slate-400">Rotas privadas/restringidas (Disallow):</p>
+            <p class="text-xs text-slate-400">Rotas privadas (Disallow):</p>
             <div class="font-mono text-xs text-amber-300 bg-slate-900 p-2 rounded max-h-36 overflow-y-auto">
               ${(r?.robots?.disallowed_paths || []).map(p => `<div>Disallow: ${p}</div>`).join('') || '<div class="text-slate-500">Nenhuma rota restrita informada</div>'}
             </div>
@@ -334,7 +462,7 @@
               <strong>Arquivo /sitemap.xml</strong>
               <span class="text-xs font-bold px-2 py-0.5 rounded ${r?.sitemap?.found ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${r?.sitemap?.found ? 'ENCONTRADO' : 'NÃO DETECTADO'}</span>
             </div>
-            <p class="text-xs text-slate-400">Total de URLs mapeadas: <strong>${r?.sitemap?.urls_count || 0}</strong></p>
+            <p class="text-xs text-slate-400">Total de URLs: <strong>${r?.sitemap?.urls_count || 0}</strong></p>
             <div class="font-mono text-xs text-slate-300 bg-slate-900 p-2 rounded max-h-36 overflow-y-auto">
               ${(r?.sitemap?.sample_urls || []).map(u => `<div>${u}</div>`).join('') || '<div class="text-slate-500">Nenhuma URL extraída</div>'}
             </div>
@@ -342,7 +470,7 @@
         </div>
       `;
 
-      // 5. Aba Cookies
+      // 8. Aba Cookies
       const boxCookies = document.getElementById('conteudo-cookies');
       boxCookies.innerHTML = '';
       if (data.cookies && data.cookies.length > 0) {
@@ -367,7 +495,7 @@
         boxCookies.innerHTML = `<p class="text-slate-400">Nenhum cookie definido na resposta inicial da aplicação.</p>`;
       }
 
-      // 6. Aba SSL
+      // 9. Aba SSL
       const boxSsl = document.getElementById('conteudo-ssl');
       if (data.ssl && !data.ssl.error) {
         boxSsl.innerHTML = `
@@ -383,7 +511,7 @@
         boxSsl.innerHTML = `<p class="text-rose-400">Não foi possível auditar o certificado SSL/TLS: ${data.ssl?.error || 'Desconhecido'}</p>`;
       }
 
-      // 7. Aba Fuzzing
+      // 10. Aba Fuzzing
       const boxFuzz = document.getElementById('conteudo-fuzz');
       boxFuzz.innerHTML = '';
       if (data.fuzzing && data.fuzzing.length > 0) {
@@ -394,7 +522,7 @@
         boxFuzz.innerHTML = `<p class="text-slate-400">Nenhum diretório padrão exposto ou vulnerável encontrado.</p>`;
       }
 
-      // 8. Aba Vulnerabilidades
+      // 11. Aba Vulnerabilidades
       const boxVuln = document.getElementById('conteudo-vuln');
       boxVuln.innerHTML = '';
       if (data.vulnerabilidades && data.vulnerabilidades.length > 0) {
