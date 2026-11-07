@@ -117,12 +117,14 @@ def _load_robots(base_url, timeout):
 
 
 def crawl_site(target_url, max_pages=DEFAULT_MAX_PAGES, max_depth=DEFAULT_MAX_DEPTH,
-               timeout=REQUEST_TIMEOUT, respect_robots=True, seed_html=None):
+               timeout=REQUEST_TIMEOUT, respect_robots=True, seed_html=None,
+               extra_headers=None, cookies=None):
     """
     Rastreia o site mantendo-se na mesma origem (esquema + host + porta).
 
     Retorna as páginas com o HTML em memória para que os scanners possam
     reaproveitar o conteúdo sem baixar de novo.
+    Suporta autenticação com extra_headers e cookies.
     """
     try:
         max_pages = max(1, min(int(max_pages), 50))
@@ -138,6 +140,10 @@ def crawl_site(target_url, max_pages=DEFAULT_MAX_PAGES, max_depth=DEFAULT_MAX_DE
     queue = deque([(start, 0, seed_html)])
     seen = {start}
 
+    req_headers = {"User-Agent": USER_AGENT}
+    if extra_headers and isinstance(extra_headers, dict):
+        req_headers.update(extra_headers)
+
     while queue and len(pages) < max_pages:
         url, depth, html = queue.popleft()
 
@@ -147,7 +153,11 @@ def crawl_site(target_url, max_pages=DEFAULT_MAX_PAGES, max_depth=DEFAULT_MAX_DE
                 continue
             try:
                 response = requests.get(
-                    url, timeout=timeout, headers={"User-Agent": USER_AGENT}, allow_redirects=True
+                    url,
+                    timeout=timeout,
+                    headers=req_headers,
+                    cookies=cookies,
+                    allow_redirects=True,
                 )
             except Exception as exc:
                 errors.append({"url": url, "error": str(exc)[:160]})

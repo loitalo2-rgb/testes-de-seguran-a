@@ -85,22 +85,25 @@ def _build_get_url(url, name, value):
     return urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urllib.parse.urlencode(query), parsed.fragment))
 
 
-def _send(param, payload):
+def _send(param, payload, extra_headers=None):
     """Envia o payload em um único parâmetro. Retorna (url, texto) ou None."""
+    headers = {"User-Agent": USER_AGENT}
+    if extra_headers and isinstance(extra_headers, dict):
+        headers.update(extra_headers)
     try:
         if param["method"] == "POST":
             resp = requests.post(
                 param["url"],
                 data={param["name"]: payload},
                 timeout=REQUEST_TIMEOUT,
-                headers={"User-Agent": USER_AGENT},
+                headers=headers,
             )
             return param["url"], resp.text
         test_url = _build_get_url(param["url"], param["name"], payload)
         resp = requests.get(
             test_url,
             timeout=REQUEST_TIMEOUT,
-            headers={"User-Agent": USER_AGENT},
+            headers=headers,
         )
         return test_url, resp.text
     except Exception:
@@ -135,9 +138,15 @@ def _build_finding(kind, param, payload, test_url, evidence, desc, impact, fix):
     }
 
 
-def _test_task(param, kind, label, payload, expected):
+def _test_task(param, kind, label, payload, expected, extra_headers=None):
     """Executa um teste e devolve um achado quando confirmado."""
-    result = _send(param, payload)
+    if extra_headers:
+        try:
+            result = _send(param, payload, extra_headers=extra_headers)
+        except TypeError:
+            result = _send(param, payload)
+    else:
+        result = _send(param, payload)
     if not result:
         return None
     test_url, text = result
@@ -171,7 +180,7 @@ def _test_task(param, kind, label, payload, expected):
     return _build_finding(kind, param, payload, test_url, evidence, desc, impact, fix)
 
 
-def run_advanced_injection(target_url, html_content=None):
+def run_advanced_injection(target_url, html_content=None, extra_headers=None):
     """
     Testa SSTI, LFI/Path Traversal e Command Injection de forma
     NÃO destrutiva (apenas leitura de arquivos e eco de marcador).
@@ -186,12 +195,12 @@ def run_advanced_injection(target_url, html_content=None):
     for param in params:
         for label, template in SSTI_TEMPLATES:
             payload = template.replace("A", str(a)).replace("B", str(b))
-            tasks.append((param, "SSTI", label, payload, product))
+            tasks.append((param, "SSTI", label, payload, product, extra_headers))
         for label, payload, signatures in LFI_PAYLOADS:
-            tasks.append((param, "LFI", label, payload, signatures))
+            tasks.append((param, "LFI", label, payload, signatures, extra_headers))
         for template, label in CMD_TEMPLATES:
             payload = template.replace("MARKER", marker)
-            tasks.append((param, "CMD", label, payload, marker))
+            tasks.append((param, "CMD", label, payload, marker, extra_headers))
 
     findings = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:

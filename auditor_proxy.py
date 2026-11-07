@@ -567,46 +567,35 @@ proxy_manager = SecurityProxyManager()
 
 
 def launch_proxy_browser(host: str = "127.0.0.1", port: int = 8090, target_url: str = "http://example.com") -> Dict[str, Any]:
-    """Abre uma instância do Chrome ou Edge já com o proxy apontado para 127.0.0.1:8090."""
+    """Abre uma instância do navegador (Edge ou Chrome) apontando para o proxy local."""
     import os
-    import subprocess
     import tempfile
 
-    candidates = [
-        os.path.expandvars(r"%ProgramFiles%\Google\Chrome\Application\chrome.exe"),
-        os.path.expandvars(r"%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"),
-        os.path.expandvars(r"%LocalAppData%\Google\Chrome\Application\chrome.exe"),
-        os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
-        os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
-    ]
-
-    exe_path = None
-    for p in candidates:
-        if os.path.exists(p):
-            exe_path = p
-            break
-
-    if not exe_path:
-        return {"success": False, "message": "Nenhum navegador (Chrome ou Edge) encontrado nos caminhos padrão."}
+    target = target_url.strip() if target_url else "http://example.com"
+    if not target.startswith(("http://", "https://")):
+        target = "http://" + target
 
     user_dir = os.path.join(tempfile.gettempdir(), "security_suite_proxy_browser")
-    args = [
-        exe_path,
-        f"--proxy-server=http://{host}:{port}",
-        "--ignore-certificate-errors",
-        f"--user-data-dir={user_dir}",
-        "--no-first-run",
-        "--no-default-browser-check",
-        target_url or "http://example.com"
-    ]
 
-    try:
-        subprocess.Popen(args)
+    # Tenta usar msedge via start (nativo do Windows, sempre abre em primeiro plano)
+    edge_cmd = f'start msedge --proxy-server=http://{host}:{port} --new-window --ignore-certificate-errors --user-data-dir="{user_dir}" "{target}"'
+    ret = os.system(edge_cmd)
+    if ret == 0:
         return {
             "success": True,
-            "browser": os.path.basename(exe_path),
-            "message": f"Navegador aberto apontando para o proxy {host}:{port}!",
+            "browser": "Microsoft Edge",
+            "message": f"Navegador Edge aberto com proxy {host}:{port}!",
         }
-    except Exception as exc:
-        return {"success": False, "message": f"Erro ao abrir navegador: {exc}"}
+
+    # Fallback para Chrome
+    chrome_cmd = f'start chrome --proxy-server=http://{host}:{port} --new-window --ignore-certificate-errors --user-data-dir="{user_dir}" "{target}"'
+    ret_chrome = os.system(chrome_cmd)
+    if ret_chrome == 0:
+        return {
+            "success": True,
+            "browser": "Google Chrome",
+            "message": f"Navegador Chrome aberto com proxy {host}:{port}!",
+        }
+
+    return {"success": False, "message": "Não foi possível abrir o navegador automaticamente via Windows Shell."}
 

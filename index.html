@@ -22,6 +22,9 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
+        <button id="btn-export-exec" onclick="exportarRelatorioExecutivo()" class="hidden bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-xs text-white px-3.5 py-2 rounded-lg flex items-center gap-2 transition shadow-md">
+          <i data-lucide="file-text" class="w-4 h-4 text-white"></i> Relatório Executivo (PDF)
+        </button>
         <button id="btn-export-json" onclick="exportarJSON()" class="hidden bg-slate-900 hover:bg-slate-800 text-xs text-slate-300 border border-slate-700 px-3.5 py-2 rounded-lg flex items-center gap-2 transition">
           <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i> Baixar Relatório (JSON)
         </button>
@@ -106,6 +109,45 @@
           </span>
         </label>
       </div>
+
+      <!-- Opções Avançadas: Autenticação / Sessão & Webhook -->
+      <details class="group border border-slate-800 rounded-xl bg-slate-950/60 overflow-hidden">
+        <summary class="p-3.5 flex items-center justify-between text-xs font-semibold text-slate-300 cursor-pointer hover:bg-slate-800/40 transition">
+          <div class="flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-purple-400"></i>
+            <span>Opções Avançadas: Varredura Autenticada (Área Logada) & Notificação Webhook</span>
+          </div>
+          <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 group-open:rotate-180 transition-transform"></i>
+        </summary>
+        <div class="p-4 border-t border-slate-800 space-y-4 text-xs">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Tipo de Autenticação</label>
+              <select id="auth-type" onchange="atualizarAuthPlaceholder()" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-indigo-500">
+                <option value="none">Nenhuma (Pública)</option>
+                <option value="cookie">Cookie de Sessão</option>
+                <option value="bearer">Bearer Token (JWT)</option>
+                <option value="custom">Header Customizado</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block font-semibold text-slate-300 mb-1">Valor da Credencial / Sessão</label>
+              <input type="text" id="auth-value" placeholder="Selecione o tipo de autenticação acima..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t border-slate-800/60 items-end">
+            <div class="md:col-span-3">
+              <label class="block font-semibold text-slate-300 mb-1">Webhook de Alerta (Discord / Slack / Teams)</label>
+              <input type="url" id="webhook-url" placeholder="https://discord.com/api/webhooks/... ou https://hooks.slack.com/..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" />
+            </div>
+            <div>
+              <button type="button" onclick="testarWebhook()" id="btn-test-webhook" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 p-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition">
+                <i data-lucide="bell" class="w-3.5 h-3.5 text-amber-400"></i> Testar Webhook
+              </button>
+            </div>
+          </div>
+        </div>
+      </details>
 
       <!-- Botão de Ação -->
       <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800">
@@ -590,6 +632,80 @@
       downloadAnchor.remove();
     }
 
+    async function exportarRelatorioExecutivo() {
+      if (!scanDataGlobal) {
+        alert('Execute uma varredura primeiro para gerar o relatório executivo.');
+        return;
+      }
+      try {
+        const resp = await fetch('/api/report/html', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scan_data: scanDataGlobal })
+        });
+        if (!resp.ok) throw new Error('Erro ao gerar relatório no servidor.');
+        const htmlText = await resp.text();
+        const blob = new Blob([htmlText], { type: 'text/html;charset=utf-8' });
+        const blobUrl = URL.createObjectURL(blob);
+        const win = window.open(blobUrl, '_blank');
+        if (!win) {
+          const downloadAnchor = document.createElement('a');
+          downloadAnchor.href = blobUrl;
+          downloadAnchor.download = `relatorio_executivo_${scanDataGlobal.hostname || 'alvo'}.html`;
+          document.body.appendChild(downloadAnchor);
+          downloadAnchor.click();
+          downloadAnchor.remove();
+        }
+      } catch (err) {
+        alert('Falha ao exportar relatório: ' + err);
+      }
+    }
+
+    function atualizarAuthPlaceholder() {
+      const type = document.getElementById('auth-type').value;
+      const input = document.getElementById('auth-value');
+      if (type === 'bearer') {
+        input.placeholder = 'ex: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+      } else if (type === 'cookie') {
+        input.placeholder = 'ex: PHPSESSID=abc12345; session_token=xyz987';
+      } else if (type === 'custom') {
+        input.placeholder = 'ex: X-API-Key: segredo123 ou Header: Valor';
+      } else {
+        input.placeholder = 'Selecione o tipo de autenticação acima...';
+      }
+    }
+
+    async function testarWebhook() {
+      const webhookUrl = document.getElementById('webhook-url').value.trim();
+      const btn = document.getElementById('btn-test-webhook');
+      if (!webhookUrl) {
+        alert('Digite a URL do webhook (Discord / Slack / Teams) antes de testar.');
+        return;
+      }
+      btn.disabled = true;
+      btn.innerHTML = '<span class="animate-spin"><i data-lucide="loader-2" class="w-3.5 h-3.5"></i></span> Enviando...';
+      lucide.createIcons();
+      try {
+        const resp = await fetch('/api/webhook/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ webhook_url: webhookUrl })
+        });
+        const res = await resp.json();
+        if (resp.ok && res.success) {
+          alert('✓ Sucesso! Mensagem de teste enviada com sucesso para o webhook.');
+        } else {
+          alert('Falha ao enviar para o webhook: ' + (res.message || 'Erro desconhecido'));
+        }
+      } catch (err) {
+        alert('Erro ao testar webhook: ' + err);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="bell" class="w-3.5 h-3.5 text-amber-400"></i> Testar Webhook';
+        lucide.createIcons();
+      }
+    }
+
     async function carregarHistorico() {
       try {
         const resp = await fetch('/api/history');
@@ -856,15 +972,27 @@
       document.getElementById('loader-mode-badge').innerText = modeNames[selectedMode] || 'Processando';
 
       try {
+        const authType = document.getElementById('auth-type').value;
+        const authValue = document.getElementById('auth-value').value;
+        const webhookUrl = document.getElementById('webhook-url').value;
+
         const response = await fetch('/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url, nmap_mode: selectedMode, crawl: document.getElementById('crawl-enabled').checked })
+          body: JSON.stringify({
+            url: url,
+            nmap_mode: selectedMode,
+            crawl: document.getElementById('crawl-enabled').checked,
+            auth_type: authType,
+            auth_value: authValue,
+            webhook_url: webhookUrl
+          })
         });
 
         if (!response.ok) throw new Error('Falha na resposta do servidor');
         scanDataGlobal = await response.json();
 
+        document.getElementById('btn-export-exec').classList.remove('hidden');
         document.getElementById('btn-export-json').classList.remove('hidden');
         document.getElementById('btn-print-pdf').classList.remove('hidden');
 

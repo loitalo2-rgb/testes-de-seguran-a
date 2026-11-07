@@ -23,9 +23,39 @@ from auditor_injecao_avancada import run_advanced_injection
 from auditor_logs import analyze_logs
 from auditor_crawler import crawl_site, crawl_summary
 from auditor_proxy import proxy_manager, launch_proxy_browser
+from notificador_webhook import send_scan_webhook
+from relatorio_executivo import generate_executive_html
 
 PORT = 5000
 MAX_LOG_BYTES = 5 * 1024 * 1024
+
+
+def build_auth_config(auth_type: str, auth_value: str):
+    """Retorna (headers_dict, cookies_dict) a partir da configuração de autenticação."""
+    headers = {}
+    cookies = {}
+    auth_type = (auth_type or "none").lower()
+    val = (auth_value or "").strip()
+    if not val or auth_type == "none":
+        return headers, cookies
+
+    if auth_type == "bearer":
+        token = val[7:].strip() if val.lower().startswith("bearer ") else val
+        headers["Authorization"] = f"Bearer {token}"
+    elif auth_type == "cookie":
+        headers["Cookie"] = val
+        for pair in val.split(";"):
+            if "=" in pair:
+                k, v = pair.split("=", 1)
+                cookies[k.strip()] = v.strip()
+    elif auth_type == "custom":
+        if ":" in val:
+            hname, hval = val.split(":", 1)
+            headers[hname.strip()] = hval.strip()
+        else:
+            headers["X-Auth-Token"] = val
+
+    return headers, cookies
 
 
 def _page_has_inputs(url, html):
@@ -97,6 +127,10 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 target_url = data.get('url', '').strip()
                 nmap_mode = data.get('nmap_mode', 'fast')
                 crawl_enabled = bool(data.get('crawl', True))
+                auth_type = data.get('auth_type', 'none')
+                auth_value = data.get('auth_value', '').strip()
+                webhook_url = data.get('webhook_url', '').strip()
+                auth_headers, auth_cookies = build_auth_config(auth_type, auth_value)
                 try:
                     crawl_max_pages = max(1, min(int(data.get('max_pages', 8)), 15))
                 except (TypeError, ValueError):
@@ -138,7 +172,9 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             raw_cookies = []
             html_body = ""
             try:
-                c_resp = requests.get(target_url, timeout=5, headers={"User-Agent": "Mozilla/5.0"})
+                req_h = {"User-Agent": "Mozilla/5.0"}
+                req_h.update(auth_headers)
+                c_resp = requests.get(target_url, timeout=6, headers=req_h, cookies=auth_cookies)
                 raw_cookies = c_resp.cookies
                 html_body = c_resp.text
             except Exception:
@@ -186,7 +222,7 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 vuln_results = scanner_visual.run_scanner(target_url, payloads)
 
             # 15. Injeção Avançada (SSTI, LFI/Path Traversal e Command Injection)
-            advanced_injections = run_advanced_injection(target_url, html_body)
+            advanced_injections = run_advanced_injection(target_url, html_body, extra_headers=auth_headers)
 
             # 16. Crawler same-origin e varredura multi-página
             crawl_res = {
@@ -206,6 +242,8 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                     max_pages=crawl_max_pages,
                     max_depth=2,
                     seed_html=html_body,
+                    extra_headers=auth_headers,
+                    cookies=auth_cookies,
                 )
                 crawl_res = crawl_summary(crawled)
                 crawl_res["enabled"] = True
@@ -319,6 +357,12 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
 
             save_scan_history(response_payload)
 
+            if webhook_url:
+                try:
+                    send_scan_webhook(webhook_url, response_payload)
+                except Exception as exc:
+                    print(f"[!] Falha ao disparar webhook de auditoria: {exc}")
+
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
@@ -428,6 +472,8 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(b'{"error": "URL obrigatoria"}')
                 return
+            if not url.startswith(('http://', 'https://')):
+                url = 'http://' + url
             if not proxy_manager.is_running():
                 proxy_manager.start(host='127.0.0.1', port=8090)
             try:
@@ -443,6 +489,46 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
             self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
+        elif self.path == '/api/webhook/test':
+            content_length = int(self.headers.get('Content-Length', 0))
+            data = {}
+            if content_length > 0:
+                try:
+                    data = json.loads(self.rfile.read(content_length).decode('utf-8'))
+                except Exception:
+                    pass
+            webhook_url = data.get('webhook_url', '').strip()
+            dummy_scan = {
+                "target": "https://teste-seguranca.local",
+                "hostname": "teste-seguranca.local",
+                "score": 85,
+                "criticos": 0,
+                "medios": 2,
+                "resumo_risco": {
+                    "veredito": "POSTURA BOA",
+                    "itens": [{"severidade": "MÉDIO", "titulo": "Notificação de Teste enviada com Sucesso!"}]
+                }
+            }
+            res = send_scan_webhook(webhook_url, dummy_scan)
+            status_code = 200 if res.get('success') else 400
+            self.send_response(status_code)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
+        elif self.path == '/api/report/html':
+            content_length = int(self.headers.get('Content-Length', 0))
+            data = {}
+            if content_length > 0:
+                try:
+                    data = json.loads(self.rfile.read(content_length).decode('utf-8'))
+                except Exception:
+                    pass
+            scan_data = data.get('scan_data', {})
+            html_report = generate_executive_html(scan_data)
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(html_report.encode('utf-8'))
         else:
             self.send_response(404)
             self.send_header('Content-Type', 'application/json; charset=utf-8')

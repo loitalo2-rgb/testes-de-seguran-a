@@ -93,6 +93,20 @@ Suite completa e intuitiva para testes de segurança ofensiva e defensiva em apl
   - `GET /api/proxy/status` e `GET /api/proxy/history`
   - `GET /api/proxy/alerts` e `POST /api/proxy/clear`
 
+### 11. 🔐 Varredura Autenticada (Área Logada)
+- Suporte a cookies de sessão (`PHPSESSID`, tokens de autenticação), cabeçalhos `Authorization: Bearer <JWT>` e headers customizados (`X-API-Key`).
+- A sessão e credenciais configuradas são propagadas automaticamente para o Crawler multi-página, motor de injeções (SSTI, LFI, Command Injection) e inspeção de arquivos sensíveis.
+
+### 12. 📄 Relatório Executivo Formal (PDF / HTML)
+- **`relatorio_executivo.py`**: gera relatório corporativo pronto para apresentação a diretorias e clientes.
+- Inclui capa executiva, parecer técnico gerencial em linguagem acessível, matriz priorizada de vulnerabilidades com impacto no negócio e plano de ação recomendado.
+- Otimizado com estilos CSS `@media print` para exportação direta em PDF pelo navegador (Ctrl+P ou botão dedicado no painel).
+
+### 13. 🔔 Notificações e Webhooks (Discord, Slack, Teams)
+- **`notificador_webhook.py`**: integra com URLs de webhook para disparo automático ao finalizar auditorias.
+- Envia cards com embeds visuais contendo nota de segurança, veredito de risco, falhas críticas/médias e link do alvo.
+- Suporta Discord, Slack e payloads genéricos de automação via API (`POST /api/webhook/test`).
+
 ---
 
 ## 📦 Instalação
