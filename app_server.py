@@ -22,7 +22,7 @@ from auditor_jwt import scan_jwts
 from auditor_injecao_avancada import run_advanced_injection
 from auditor_logs import analyze_logs
 from auditor_crawler import crawl_site, crawl_summary
-from auditor_proxy import proxy_manager
+from auditor_proxy import proxy_manager, launch_proxy_browser
 
 PORT = 5000
 MAX_LOG_BYTES = 5 * 1024 * 1024
@@ -388,6 +388,57 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
         elif self.path == '/api/proxy/clear':
             res = proxy_manager.clear()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
+        elif self.path == '/api/proxy/open-browser':
+            content_length = int(self.headers.get('Content-Length', 0))
+            data = {}
+            if content_length > 0:
+                try:
+                    data = json.loads(self.rfile.read(content_length).decode('utf-8'))
+                except Exception:
+                    pass
+            host = data.get('host', '127.0.0.1')
+            try:
+                port = int(data.get('port', 8090))
+            except (ValueError, TypeError):
+                port = 8090
+            target_url = data.get('url', 'http://example.com')
+            if not proxy_manager.is_running():
+                proxy_manager.start(host=host, port=port)
+            res = launch_proxy_browser(host=host, port=port, target_url=target_url)
+            self.send_response(200 if res.get('success') else 400)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
+        elif self.path == '/api/proxy/fetch':
+            content_length = int(self.headers.get('Content-Length', 0))
+            data = {}
+            if content_length > 0:
+                try:
+                    data = json.loads(self.rfile.read(content_length).decode('utf-8'))
+                except Exception:
+                    pass
+            url = data.get('url', '').strip()
+            if not url:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(b'{"error": "URL obrigatoria"}')
+                return
+            if not proxy_manager.is_running():
+                proxy_manager.start(host='127.0.0.1', port=8090)
+            try:
+                proxies = {
+                    'http': f'http://{proxy_manager.host}:{proxy_manager.port}',
+                    'https': f'http://{proxy_manager.host}:{proxy_manager.port}',
+                }
+                r = requests.get(url, proxies=proxies, timeout=10, verify=False)
+                res = {"success": True, "status_code": r.status_code, "url": url}
+            except Exception as exc:
+                res = {"success": False, "error": str(exc), "url": url}
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
