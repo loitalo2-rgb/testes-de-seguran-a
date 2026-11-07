@@ -74,6 +74,25 @@ Suite completa e intuitiva para testes de segurança ofensiva e defensiva em apl
 - **Nova aba “Crawler”**: mapa do site com título, URL, status, profundidade, quantidade de links/formulários e achados encontrados nas páginas extras.
 - **Controle**: caixa “Rastrear o site (crawler)” no formulário; pode ser desativada para scans mais rápidos.
 
+### 10. 🛰️ Proxy Interceptador & Scanner Passivo (Estilo OWASP ZAP)
+- **`auditor_proxy.py`**: servidor proxy HTTP/HTTPS multithreaded local inspirado no OWASP ZAP para interceptação e análise de segurança de tráfego web em tempo real.
+- **Auditoria Passiva (Zero Impacto)**: analisa o tráfego capturado sem enviar requisições adicionais:
+  - Cabeçalhos defensivos ausentes (CSP, HSTS, X-Content-Type-Options, anti-Clickjacking).
+  - Cookies inseguros (falta de `HttpOnly`, `Secure` e `SameSite`).
+  - Vazamento de banners de servidores e frameworks (`Server`, `X-Powered-By`, `X-AspNet-Version`).
+  - Cache permissivo em rotas autenticadas e sensíveis.
+  - Origens excessivamente permissivas em CORS com credenciais.
+  - Exposição de mensagens de depuração técnica e *stack traces* no corpo da resposta.
+- **Painel Interativo no `index.html`**:
+  - Iniciar/Parar proxy na porta desejada (padrão `127.0.0.1:8090`).
+  - Tabela de histórico de requisições em tempo real com status, alertas e latência.
+  - Alertas classificados nos padrões OWASP (*Alto, Médio, Baixo, Informativo*) com referências CWE.
+  - Botão de envio rápido de qualquer URL interceptada para a auditoria ativa do scanner.
+- **Controle via API REST**:
+  - `POST /api/proxy/start` e `POST /api/proxy/stop`
+  - `GET /api/proxy/status` e `GET /api/proxy/history`
+  - `GET /api/proxy/alerts` e `POST /api/proxy/clear`
+
 ---
 
 ## 📦 Instalação

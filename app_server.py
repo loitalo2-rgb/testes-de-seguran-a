@@ -22,6 +22,7 @@ from auditor_jwt import scan_jwts
 from auditor_injecao_avancada import run_advanced_injection
 from auditor_logs import analyze_logs
 from auditor_crawler import crawl_site, crawl_summary
+from auditor_proxy import proxy_manager
 
 PORT = 5000
 MAX_LOG_BYTES = 5 * 1024 * 1024
@@ -58,6 +59,31 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
             self.wfile.write(json.dumps(history, ensure_ascii=False).encode('utf-8'))
+        elif self.path == '/api/proxy/status':
+            status = proxy_manager.get_status()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(status, ensure_ascii=False).encode('utf-8'))
+        elif self.path.startswith('/api/proxy/history'):
+            parsed = urllib.parse.urlparse(self.path)
+            qs = urllib.parse.parse_qs(parsed.query)
+            limit = int(qs.get('limit', ['100'])[0])
+            history = proxy_manager.get_history(limit=limit)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(history, ensure_ascii=False).encode('utf-8'))
+        elif self.path.startswith('/api/proxy/alerts'):
+            parsed = urllib.parse.urlparse(self.path)
+            qs = urllib.parse.parse_qs(parsed.query)
+            risk = qs.get('risk', [None])[0]
+            limit = int(qs.get('limit', ['100'])[0])
+            alerts = proxy_manager.get_alerts(risk=risk, limit=limit)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(alerts, ensure_ascii=False).encode('utf-8'))
         else:
             super().do_GET()
 
@@ -335,6 +361,37 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
             self.wfile.write(json.dumps(result, ensure_ascii=False).encode('utf-8'))
+        elif self.path == '/api/proxy/start':
+            content_length = int(self.headers.get('Content-Length', 0))
+            data = {}
+            if content_length > 0:
+                try:
+                    data = json.loads(self.rfile.read(content_length).decode('utf-8'))
+                except Exception:
+                    pass
+            host = data.get('host', '127.0.0.1')
+            try:
+                port = int(data.get('port', 8090))
+            except (ValueError, TypeError):
+                port = 8090
+            res = proxy_manager.start(host=host, port=port)
+            status_code = 200 if res.get('success') else 400
+            self.send_response(status_code)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
+        elif self.path == '/api/proxy/stop':
+            res = proxy_manager.stop()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
+        elif self.path == '/api/proxy/clear':
+            res = proxy_manager.clear()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
         else:
             self.send_response(404)
             self.end_headers()

@@ -191,6 +191,129 @@
       </div>
     </details>
 
+    <!-- Proxy Interceptador & Auditoria Passiva (Estilo OWASP ZAP) -->
+    <details id="painel-proxy" class="mb-8 bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden group">
+      <summary class="cursor-pointer list-none p-5 flex items-center justify-between gap-3 hover:bg-slate-800/40 transition-colors">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30">
+            <i data-lucide="radio" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-bold text-white">Proxy Interceptador & Scanner Passivo (Estilo OWASP ZAP)</h2>
+              <span id="proxy-status-pill" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Parado</span>
+            </div>
+            <p class="text-xs text-slate-400">Capture o tráfego HTTP/HTTPS do seu navegador e audite vulnerabilidades passivas (cookies, headers, CORS, vazamentos) em tempo real</p>
+          </div>
+        </div>
+        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
+      </summary>
+
+      <div class="px-5 pb-5 space-y-5 border-t border-slate-800 pt-4">
+        <!-- Controles do Proxy -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Host de Escuta</label>
+            <input type="text" id="proxy-host" value="127.0.0.1" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Porta do Proxy</label>
+            <input type="number" id="proxy-port" value="8090" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+          </div>
+          <div class="flex items-end gap-2 md:col-span-2">
+            <button onclick="toggleProxy()" id="btn-proxy-toggle" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 text-white font-semibold py-2 px-4 rounded-lg text-xs flex items-center justify-center gap-1.5 transition active:scale-95">
+              <i data-lucide="play" class="w-4 h-4"></i> Iniciar Proxy
+            </button>
+            <button onclick="limparHistoricoProxy()" class="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 py-2 px-3 rounded-lg text-xs flex items-center gap-1 transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i> Limpar
+            </button>
+            <button onclick="atualizarDadosProxy()" class="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 py-2 px-3 rounded-lg text-xs flex items-center gap-1 transition" title="Atualizar dados agora">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-indigo-400"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Instruções de Configuração -->
+        <div class="p-3 bg-indigo-950/20 border border-indigo-500/20 rounded-xl text-xs text-indigo-300 flex items-start gap-2">
+          <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold">Como usar no navegador:</span> Configure as opções de rede do Windows ou extensões (como <em>FoxyProxy</em>) para apontar o proxy HTTP para <code class="bg-slate-950 px-1 py-0.5 rounded text-white" id="proxy-instruction-addr">127.0.0.1:8090</code>. Toda requisição navegada será interceptada e auditada passivamente abaixo sem gerar tráfego invasivo.
+          </div>
+        </div>
+
+        <!-- Estatísticas do Proxy -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="proxy-stats-box">
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+            <p class="text-[11px] uppercase tracking-wide text-slate-500">Transações</p>
+            <p class="text-xl font-bold text-white" id="proxy-total-tx">0</p>
+          </div>
+          <div class="p-3 rounded-xl border border-rose-500/30 bg-rose-950/10">
+            <p class="text-[11px] uppercase tracking-wide text-rose-400">Risco Alto</p>
+            <p class="text-xl font-bold text-rose-400" id="proxy-count-alto">0</p>
+          </div>
+          <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-950/10">
+            <p class="text-[11px] uppercase tracking-wide text-amber-400">Risco Médio</p>
+            <p class="text-xl font-bold text-amber-400" id="proxy-count-medio">0</p>
+          </div>
+          <div class="p-3 rounded-xl border border-sky-500/30 bg-sky-950/10">
+            <p class="text-[11px] uppercase tracking-wide text-sky-400">Risco Baixo</p>
+            <p class="text-xl font-bold text-sky-400" id="proxy-count-baixo">0</p>
+          </div>
+          <div class="p-3 rounded-xl border border-slate-700 bg-slate-950">
+            <p class="text-[11px] uppercase tracking-wide text-slate-400">Informativo</p>
+            <p class="text-xl font-bold text-slate-300" id="proxy-count-info">0</p>
+          </div>
+        </div>
+
+        <!-- Seletor de Sub-Abas do Proxy -->
+        <div class="flex border-b border-slate-800 gap-2">
+          <button onclick="mudarSubAbaProxy('proxy-sub-alerts')" id="btn-sub-alerts" class="px-4 py-2 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500">Alertas Passivos (<span id="proxy-badge-alert-count">0</span>)</button>
+          <button onclick="mudarSubAbaProxy('proxy-sub-history')" id="btn-sub-history" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">Tráfego Interceptado (<span id="proxy-badge-tx-count">0</span>)</button>
+        </div>
+
+        <!-- Painel: Alertas Passivos -->
+        <div id="proxy-sub-alerts" class="space-y-3">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Vulnerabilidades e falhas de configuração detectadas passivamente:</span>
+            <select id="proxy-filter-risk" onchange="atualizarAlertasProxy()" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300">
+              <option value="">Todos os Riscos</option>
+              <option value="Alto">Apenas Alto</option>
+              <option value="Médio">Apenas Médio</option>
+              <option value="Baixo">Apenas Baixo</option>
+              <option value="Informativo">Apenas Informativo</option>
+            </select>
+          </div>
+          <div id="proxy-alerts-list" class="space-y-2.5 max-h-[450px] overflow-y-auto pr-1">
+            <div class="p-4 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs">Nenhum alerta passivo capturado até o momento. Inicie o proxy e navegue em uma página.</div>
+          </div>
+        </div>
+
+        <!-- Painel: Histórico de Tráfego Interceptado -->
+        <div id="proxy-sub-history" class="hidden space-y-3">
+          <div class="overflow-x-auto max-h-[450px] rounded-xl border border-slate-800 bg-slate-950">
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="bg-slate-900 text-slate-400 border-b border-slate-800 sticky top-0">
+                <tr>
+                  <th class="p-2.5">#</th>
+                  <th class="p-2.5">Método</th>
+                  <th class="p-2.5">URL</th>
+                  <th class="p-2.5">Status</th>
+                  <th class="p-2.5">Alertas</th>
+                  <th class="p-2.5">Tempo</th>
+                  <th class="p-2.5 text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="proxy-tx-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+                <tr>
+                  <td colspan="7" class="p-4 text-center text-slate-500 font-sans">Nenhuma requisição interceptada ainda.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </details>
+
     <!-- Área de Resultados Globais -->
     <div id="resultados" class="hidden space-y-6">
 
@@ -436,6 +559,7 @@
   <script>
     lucide.createIcons();
     let scanDataGlobal = null;
+    checarStatusProxy();
 
     function exportarJSON() {
       if (!scanDataGlobal) return;
@@ -1573,6 +1697,216 @@
       }
 
       lucide.createIcons();
+    }
+
+    // --- Módulo Proxy Interceptador & Scanner Passivo (Estilo OWASP ZAP) ---
+    let proxyRunning = false;
+    let proxyPollInterval = null;
+
+    function escProxyHtml(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function mudarSubAbaProxy(subAbaId) {
+      const isAlerts = subAbaId === 'proxy-sub-alerts';
+      document.getElementById('proxy-sub-alerts').classList.toggle('hidden', !isAlerts);
+      document.getElementById('proxy-sub-history').classList.toggle('hidden', isAlerts);
+      
+      const btnAlerts = document.getElementById('btn-sub-alerts');
+      const btnHistory = document.getElementById('btn-sub-history');
+      if (isAlerts) {
+        btnAlerts.className = 'px-4 py-2 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500';
+        btnHistory.className = 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white';
+      } else {
+        btnHistory.className = 'px-4 py-2 text-xs font-semibold text-emerald-400 border-b-2 border-emerald-500';
+        btnAlerts.className = 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white';
+      }
+    }
+
+    async function checarStatusProxy() {
+      try {
+        const resp = await fetch('/api/proxy/status');
+        if (resp.ok) {
+          const data = await resp.json();
+          atualizarUIProxyStatus(data);
+          if (data.running) {
+            atualizarAlertasProxy();
+            atualizarHistoricoProxy();
+          }
+        }
+      } catch (e) {}
+    }
+
+    function atualizarUIProxyStatus(data) {
+      proxyRunning = !!data.running;
+      const pill = document.getElementById('proxy-status-pill');
+      const btn = document.getElementById('btn-proxy-toggle');
+      const instr = document.getElementById('proxy-instruction-addr');
+      const host = data.host || document.getElementById('proxy-host').value || '127.0.0.1';
+      const port = data.port || document.getElementById('proxy-port').value || 8090;
+
+      if (instr) instr.innerText = `${host}:${port}`;
+
+      if (proxyRunning) {
+        pill.innerText = `Ativo em ${host}:${port}`;
+        pill.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse';
+        btn.innerHTML = '<i data-lucide="square" class="w-4 h-4"></i> Parar Proxy';
+        btn.className = 'flex-1 bg-gradient-to-r from-rose-600 to-red-600 hover:opacity-90 text-white font-semibold py-2 px-4 rounded-lg text-xs flex items-center justify-center gap-1.5 transition active:scale-95';
+        if (!proxyPollInterval) {
+          proxyPollInterval = setInterval(atualizarDadosProxy, 3000);
+        }
+      } else {
+        pill.innerText = 'Parado';
+        pill.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+        btn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Iniciar Proxy';
+        btn.className = 'flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 text-white font-semibold py-2 px-4 rounded-lg text-xs flex items-center justify-center gap-1.5 transition active:scale-95';
+        if (proxyPollInterval) {
+          clearInterval(proxyPollInterval);
+          proxyPollInterval = null;
+        }
+      }
+
+      const sum = data.summary || {};
+      const rc = sum.risk_counts || {};
+      document.getElementById('proxy-total-tx').innerText = sum.total_transactions || 0;
+      document.getElementById('proxy-badge-tx-count').innerText = sum.total_transactions || 0;
+      document.getElementById('proxy-count-alto').innerText = rc['Alto'] || 0;
+      document.getElementById('proxy-count-medio').innerText = rc['Médio'] || 0;
+      document.getElementById('proxy-count-baixo').innerText = rc['Baixo'] || 0;
+      document.getElementById('proxy-count-info').innerText = rc['Informativo'] || 0;
+      document.getElementById('proxy-badge-alert-count').innerText = sum.total_alerts || 0;
+      lucide.createIcons();
+    }
+
+    async function toggleProxy() {
+      const btn = document.getElementById('btn-proxy-toggle');
+      btn.disabled = true;
+      try {
+        if (!proxyRunning) {
+          const host = document.getElementById('proxy-host').value.trim() || '127.0.0.1';
+          const port = parseInt(document.getElementById('proxy-port').value, 10) || 8090;
+          const resp = await fetch('/api/proxy/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ host, port })
+          });
+          const res = await resp.json();
+          if (!resp.ok) {
+            alert('Falha ao iniciar proxy: ' + (res.message || res.error || 'Erro desconhecido'));
+          }
+        } else {
+          await fetch('/api/proxy/stop', { method: 'POST' });
+        }
+        await checarStatusProxy();
+      } catch (err) {
+        alert('Erro de comunicação com o servidor: ' + err);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function atualizarDadosProxy() {
+      await checarStatusProxy();
+      await atualizarAlertasProxy();
+      await atualizarHistoricoProxy();
+    }
+
+    async function atualizarAlertasProxy() {
+      const risk = document.getElementById('proxy-filter-risk').value;
+      const url = '/api/proxy/alerts' + (risk ? `?risk=${encodeURIComponent(risk)}` : '');
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) return;
+        const alerts = await resp.json();
+        const box = document.getElementById('proxy-alerts-list');
+        if (alerts.length === 0) {
+          box.innerHTML = '<div class="p-4 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs">Nenhum alerta passivo capturado para este filtro.</div>';
+          return;
+        }
+        const badgeColors = {
+          'Alto': 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+          'Médio': 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+          'Baixo': 'bg-sky-500/20 text-sky-300 border-sky-500/30',
+          'Informativo': 'bg-slate-700/40 text-slate-300 border-slate-600'
+        };
+        box.innerHTML = alerts.map(a => `
+          <div class="p-3.5 rounded-xl border border-slate-800 bg-slate-950 space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-xs font-bold text-white">${escProxyHtml(a.title)}</span>
+                <span class="text-[10px] font-mono text-slate-400 ml-2">${escProxyHtml(a.cwe || '')}</span>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${badgeColors[a.risk] || badgeColors['Informativo']}">${escProxyHtml(a.risk)}</span>
+            </div>
+            <p class="text-xs text-slate-400">${escProxyHtml(a.description)}</p>
+            <div class="text-[11px] font-mono bg-slate-900 p-2 rounded border border-slate-800/80 text-rose-300 break-all">
+              <strong>URL:</strong> ${escProxyHtml(a.url)}<br/>
+              <strong>Evidência:</strong> ${escProxyHtml(a.evidence)}
+            </div>
+            <div class="text-[11px] text-emerald-400 bg-emerald-950/20 border border-emerald-500/20 p-2 rounded">
+              <strong>Solução:</strong> ${escProxyHtml(a.solution)}
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+
+    async function atualizarHistoricoProxy() {
+      try {
+        const resp = await fetch('/api/proxy/history?limit=50');
+        if (!resp.ok) return;
+        const history = await resp.json();
+        const tbody = document.getElementById('proxy-tx-table-body');
+        if (history.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-500 font-sans">Nenhuma requisição interceptada ainda.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = history.map(tx => {
+          const isErr = tx.status_code >= 400 || tx.status_code === 0;
+          const statusClass = isErr ? 'text-rose-400' : 'text-emerald-400';
+          const alertBadge = tx.alert_count > 0 
+            ? `<span class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">${tx.alert_count}</span>` 
+            : `<span class="text-slate-600">0</span>`;
+          return `
+            <tr class="hover:bg-slate-900/60 transition">
+              <td class="p-2.5 text-slate-500 font-bold">${tx.id}</td>
+              <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-indigo-300 font-bold">${escProxyHtml(tx.method)}</span></td>
+              <td class="p-2.5 max-w-xs truncate" title="${escProxyHtml(tx.url)}"><a href="${escProxyHtml(tx.url)}" target="_blank" class="hover:underline text-slate-300">${escProxyHtml(tx.url)}</a></td>
+              <td class="p-2.5 font-bold ${statusClass}">${tx.status_code}</td>
+              <td class="p-2.5">${alertBadge}</td>
+              <td class="p-2.5 text-slate-500">${tx.duration_ms}ms</td>
+              <td class="p-2.5 text-right font-sans">
+                <button onclick="auditarEndpointProxy('${escProxyHtml(tx.url)}')" class="bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white px-2 py-1 rounded text-[10px] font-semibold transition" title="Copiar para o campo de Auditoria Ativa">
+                  Auditar
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (e) {}
+    }
+
+    async function limparHistoricoProxy() {
+      if (!confirm('Deseja limpar todo o histórico de transações e alertas do Proxy?')) return;
+      try {
+        await fetch('/api/proxy/clear', { method: 'POST' });
+        await atualizarDadosProxy();
+      } catch (e) {}
+    }
+
+    function auditarEndpointProxy(url) {
+      if (!url) return;
+      const input = document.getElementById('url-input');
+      if (input) {
+        input.value = url;
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        input.focus();
+      }
     }
   </script>
 </body>
