@@ -1,6 +1,8 @@
 # QA Web Inspector & Advanced Security Suite 🛡️
 
-Suite completa e intuitiva para testes de segurança ofensiva e defensiva em aplicações web, inspeção de headers OWASP Top 10 e automação de testes de segurança.
+Suite completa e intuitiva para testes de segurança ofensiva e defensiva em aplicações web, inspeção de headers OWASP Top 10, proxy interceptador estilo ZAP e automação de testes de segurança com relatórios executivos.
+
+![Dashboard Preview](dashboard_preview.png)
 
 ---
 

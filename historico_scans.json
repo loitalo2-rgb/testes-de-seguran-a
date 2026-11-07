@@ -1,6 +1,6 @@
 [
   {
-    "timestamp": "2026-11-05 13:18:38",
+    "timestamp": "2026-11-07 06:42:19",
     "target": "https://diskentulho.fun/",
     "hostname": "diskentulho.fun",
     "score": 65,
@@ -8,23 +8,127 @@
     "medios": 1
   },
   {
-    "timestamp": "2026-11-05 13:11:26",
-    "target": "https://diskentulho.fun/",
-    "hostname": "diskentulho.fun",
-    "score": 65,
-    "criticos": 1,
-    "medios": 1
-  },
-  {
-    "timestamp": "2026-11-05 13:04:19",
+    "timestamp": "2026-11-07 06:36:14",
     "target": "https://diskentulho.fun",
     "hostname": "diskentulho.fun",
     "score": 65,
     "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-07 00:11:54",
+    "target": "https://diskentulho.fun",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-06 23:55:54",
+    "target": "https://xpaywalletcdn-prod.azureedge.net:443",
+    "hostname": "xpaywalletcdn-prod.azureedge.net",
+    "score": 30,
+    "criticos": 2,
+    "medios": 4
+  },
+  {
+    "timestamp": "2026-11-06 23:26:49",
+    "target": "https://iguatemi.com.br/esplanada",
+    "hostname": "iguatemi.com.br",
+    "score": 0,
+    "criticos": 24,
+    "medios": 9
+  },
+  {
+    "timestamp": "2026-11-06 23:18:55",
+    "target": "https://iguatemi.com.br/esplanada",
+    "hostname": "iguatemi.com.br",
+    "score": 0,
+    "criticos": 24,
+    "medios": 9
+  },
+  {
+    "timestamp": "2026-11-06 22:40:57",
+    "target": "https://iguatemi.com.br/esplanada",
+    "hostname": "iguatemi.com.br",
+    "score": 0,
+    "criticos": 24,
+    "medios": 9
+  },
+  {
+    "timestamp": "2026-11-06 22:24:46",
+    "target": "https://diskentulho.fun/",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-06 22:08:34",
+    "target": "http://127.0.0.1:8084/",
+    "hostname": "127.0.0.1",
+    "score": 0,
+    "criticos": 10,
+    "medios": 4
+  },
+  {
+    "timestamp": "2026-11-06 22:07:35",
+    "target": "http://127.0.0.1:8084/https://example.com",
+    "hostname": "127.0.0.1",
+    "score": 25,
+    "criticos": 2,
+    "medios": 4
+  },
+  {
+    "timestamp": "2026-11-06 22:06:45",
+    "target": "http://127.0.0.1:8084/",
+    "hostname": "127.0.0.1",
+    "score": 0,
+    "criticos": 10,
+    "medios": 4
+  },
+  {
+    "timestamp": "2026-11-06 11:52:36",
+    "target": "https://diskentulho.fun",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-06 11:51:02",
+    "target": "http://127.0.0.1:8083/?id=teste",
+    "hostname": "127.0.0.1",
+    "score": 0,
+    "criticos": 12,
+    "medios": 4
+  },
+  {
+    "timestamp": "2026-11-06 11:50:57",
+    "target": "https://example.com",
+    "hostname": "example.com",
+    "score": 25,
+    "criticos": 2,
     "medios": 2
   },
   {
-    "timestamp": "2026-11-05 12:59:25",
+    "timestamp": "2026-11-06 11:50:20",
+    "target": "http://127.0.0.1:8083/?id=teste",
+    "hostname": "127.0.0.1",
+    "score": 0,
+    "criticos": 12,
+    "medios": 4
+  },
+  {
+    "timestamp": "2026-11-06 11:41:30",
+    "target": "http://127.0.0.1:8082",
+    "hostname": "127.0.0.1",
+    "score": 0,
+    "criticos": 4,
+    "medios": 7
+  },
+  {
+    "timestamp": "2026-11-06 11:35:46",
     "target": "https://diskentulho.fun",
     "hostname": "diskentulho.fun",
     "score": 65,
@@ -32,56 +136,104 @@
     "medios": 1
   },
   {
-    "timestamp": "2026-11-05 12:54:56",
-    "target": "https://diskentulho.fun/",
-    "hostname": "diskentulho.fun",
-    "score": 65,
-    "criticos": 1,
-    "medios": 1
+    "timestamp": "2026-11-06 11:33:16",
+    "target": "http://127.0.0.1:8081",
+    "hostname": "127.0.0.1",
+    "score": 0,
+    "criticos": 5,
+    "medios": 6
   },
   {
-    "timestamp": "2026-11-05 12:38:35",
-    "target": "https://diskentulho.fun/",
-    "hostname": "diskentulho.fun",
-    "score": 65,
-    "criticos": 1,
-    "medios": 1
-  },
-  {
-    "timestamp": "2026-11-05 12:35:39",
-    "target": "https://diskentulho.fun/",
-    "hostname": "diskentulho.fun",
-    "score": 65,
-    "criticos": 1,
-    "medios": 1
-  },
-  {
-    "timestamp": "2026-11-05 12:09:49",
-    "target": "https://diskentulho.fun/",
-    "hostname": "diskentulho.fun",
-    "score": 65,
-    "criticos": 1,
-    "medios": 1
-  },
-  {
-    "timestamp": "2026-11-05 12:06:45",
-    "target": "https://diskentulho.fun/",
-    "hostname": "diskentulho.fun",
-    "score": 65,
-    "criticos": 1,
-    "medios": 1
-  },
-  {
-    "timestamp": "2026-11-05 12:04:26",
-    "target": "https://diskentulho.fun/",
-    "hostname": "diskentulho.fun",
-    "score": 65,
-    "criticos": 1,
-    "medios": 1
-  },
-  {
-    "timestamp": "2026-11-05 11:53:33",
+    "timestamp": "2026-11-06 11:28:46",
     "target": "https://diskentulho.fun",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-06 11:27:46",
+    "target": "https://example.com",
+    "hostname": "example.com",
+    "score": 25,
+    "criticos": 2,
+    "medios": 2
+  },
+  {
+    "timestamp": "2026-11-06 11:23:20",
+    "target": "https://diskentulho.fun",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-06 11:15:26",
+    "target": "https://diskentulho.fun",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-06 11:14:45",
+    "target": "https://example.com",
+    "hostname": "example.com",
+    "score": 25,
+    "criticos": 2,
+    "medios": 2
+  },
+  {
+    "timestamp": "2026-11-06 11:08:25",
+    "target": "https://diskentulho.fun/",
+    "hostname": "diskentulho.fun",
+    "score": 65,
+    "criticos": 1,
+    "medios": 1
+  },
+  {
+    "timestamp": "2026-11-05 17:20:46",
+    "target": "https://iguatemi.com.br/esplanada",
+    "hostname": "iguatemi.com.br",
+    "score": 0,
+    "criticos": 7,
+    "medios": 2
+  },
+  {
+    "timestamp": "2026-11-05 17:16:42",
+    "target": "http://localhost:5000/",
+    "hostname": "localhost",
+    "score": 100,
+    "criticos": 0,
+    "medios": 2
+  },
+  {
+    "timestamp": "2026-11-05 14:12:42",
+    "target": "https://sorocabashopping.com.br/",
+    "hostname": "sorocabashopping.com.br",
+    "score": 20,
+    "criticos": 2,
+    "medios": 2
+  },
+  {
+    "timestamp": "2026-11-05 13:53:37",
+    "target": "https://sorocabashopping.com.br/",
+    "hostname": "sorocabashopping.com.br",
+    "score": 20,
+    "criticos": 2,
+    "medios": 2
+  },
+  {
+    "timestamp": "2026-11-05 13:36:10",
+    "target": "https://axayacatl.neocities.org/",
+    "hostname": "axayacatl.neocities.org",
+    "score": 65,
+    "criticos": 0,
+    "medios": 4
+  },
+  {
+    "timestamp": "2026-11-05 13:29:00",
+    "target": "https://diskentulho.fun/",
     "hostname": "diskentulho.fun",
     "score": 65,
     "criticos": 1,
