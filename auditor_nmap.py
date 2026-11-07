@@ -48,7 +48,7 @@ def run_nmap_scan(target_host, mode="fast"):
 
         try:
             print(f"[*] Executando Nmap [{mode_label}] no alvo: {target_host}...")
-            process = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_sec)
+            process = subprocess.run(cmd, capture_output=True, text=True, errors="replace", timeout=timeout_sec)
             output = process.stdout or ""
             
             ports_found = []

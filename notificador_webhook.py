@@ -81,6 +81,9 @@ def send_scan_webhook(webhook_url: str, scan_data: Dict[str, Any], timeout: int 
     if not url:
         return {"success": False, "message": "URL de webhook não informada."}
 
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+
     # Detecta tipo de serviço
     if "discord.com/api/webhooks" in url:
         payload = format_discord_payload(scan_data)

@@ -137,8 +137,8 @@
           </div>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t border-slate-800/60 items-end">
             <div class="md:col-span-3">
-              <label class="block font-semibold text-slate-300 mb-1">Webhook de Alerta (Discord / Slack / Teams)</label>
-              <input type="url" id="webhook-url" placeholder="https://discord.com/api/webhooks/... ou https://hooks.slack.com/..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" />
+              <label class="block font-semibold text-slate-300 mb-1">Webhook de Alerta (Discord / Slack / Teams) <span class="text-slate-500 font-normal">(Opcional)</span></label>
+              <input type="url" id="webhook-url" placeholder="https://discord.com/api/webhooks/... (deixe vazio se não for usar)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 focus:outline-none focus:border-indigo-500" />
             </div>
             <div>
               <button type="button" onclick="testarWebhook()" id="btn-test-webhook" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 p-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition">
@@ -679,8 +679,12 @@
       const webhookUrl = document.getElementById('webhook-url').value.trim();
       const btn = document.getElementById('btn-test-webhook');
       if (!webhookUrl) {
-        alert('Digite a URL do webhook (Discord / Slack / Teams) antes de testar.');
+        alert('Digite a URL do webhook (Discord / Slack / Teams) antes de testar.\n\nSe você não usa Discord ou Slack, basta deixar este campo vazio.');
         return;
+      }
+      if (!webhookUrl.includes('discord.com') && !webhookUrl.includes('slack.com') && !webhookUrl.includes('office.com') && !webhookUrl.includes('/webhook')) {
+        const confirmar = confirm('Aviso: esta URL parece ser de um site comum e não uma URL de Webhook de notificação (como Discord ou Slack).\n\nLembre-se: o site que você quer auditar deve ser colocado no campo "Endereço do Alvo para Auditoria" no topo da página.\n\nDeseja testar o envio de notificação para esta URL mesmo assim?');
+        if (!confirmar) return;
       }
       btn.disabled = true;
       btn.innerHTML = '<span class="animate-spin"><i data-lucide="loader-2" class="w-3.5 h-3.5"></i></span> Enviando...';
