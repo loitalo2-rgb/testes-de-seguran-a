@@ -1,6 +1,7 @@
 import http.server
 import socketserver
 import json
+import re
 import urllib.parse
 import webbrowser
 import os
@@ -15,8 +16,22 @@ from auditor_avancado import scan_ports, check_sensitive_files, detect_js_librar
 from auditor_nmap import run_nmap_scan
 from auditor_sub_methods import enumerate_subdomains_crtsh, check_http_methods
 from auditor_whois_geo import get_domain_whois_rdap, get_ip_geolocation
+from auditor_pii_lgpd import scan_pii_and_pix
+from auditor_secrets import scan_secrets
+from auditor_jwt import scan_jwts
+from auditor_injecao_avancada import run_advanced_injection
+from auditor_logs import analyze_logs
+from auditor_crawler import crawl_site, crawl_summary
 
 PORT = 5000
+MAX_LOG_BYTES = 5 * 1024 * 1024
+
+
+def _page_has_inputs(url, html):
+    """Só vale a pena rodar injeções em páginas com parâmetros ou campos."""
+    if urllib.parse.urlparse(url).query:
+        return True
+    return bool(re.search(r"<(form|input|textarea|select)\b", html or "", re.IGNORECASE))
 
 class PentestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -55,6 +70,11 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 data = json.loads(post_data.decode('utf-8'))
                 target_url = data.get('url', '').strip()
                 nmap_mode = data.get('nmap_mode', 'fast')
+                crawl_enabled = bool(data.get('crawl', True))
+                try:
+                    crawl_max_pages = max(1, min(int(data.get('max_pages', 8)), 15))
+                except (TypeError, ValueError):
+                    crawl_max_pages = 8
             except Exception:
                 self.send_response(400)
                 self.end_headers()
@@ -99,6 +119,15 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 pass
             cookies_res = inspect_cookies_privacy(raw_cookies, target_url)
 
+            # 5.1. Varredura de PII, Chaves PIX e Conformidade LGPD no HTML
+            pii_findings = scan_pii_and_pix(html_body)
+
+            # 5.2. Varredura de Segredos Expostos (chaves, tokens e senhas) no HTML e JS
+            secret_findings = scan_secrets(html_body, target_url)
+
+            # 5.3. Análise e quebra offline de tokens JWT (segredo fraco, alg none, claims)
+            jwt_findings = scan_jwts(html_body, target_url)
+
             # 6. Detecção de Componentes Frontend (JS Libraries)
             js_libs = detect_js_libraries(html_body)
 
@@ -115,26 +144,108 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             whois_res = get_domain_whois_rdap(hostname)
             geo_res = get_ip_geolocation(hostname)
 
-            # 10. Auditoria com Nmap (fast, advanced ou deep)
+            # 11. Auditoria com Nmap (fast, advanced ou deep)
             nmap_res = run_nmap_scan(hostname, mode=nmap_mode)
 
-            # 11. Scanner Rápido de Portas / Serviços Expostos
+            # 12. Scanner Rápido de Portas / Serviços Expostos
             open_ports = scan_ports(hostname)
 
-            # 12. Fuzzing e Busca de Pastas & Subpastas
+            # 13. Fuzzing e Busca de Pastas & Subpastas
             fuzz_results = fuzzer_moderno.start_fuzzing(target_url, recursive=True)
 
-            # 13. Scanner de Vulnerabilidades (XSS e SQLi)
+            # 14. Scanner de Vulnerabilidades (XSS e SQLi)
             payloads = scanner_visual.load_payloads("payloads.json")
             vuln_results = []
             if payloads:
                 vuln_results = scanner_visual.run_scanner(target_url, payloads)
+
+            # 15. Injeção Avançada (SSTI, LFI/Path Traversal e Command Injection)
+            advanced_injections = run_advanced_injection(target_url, html_body)
+
+            # 16. Crawler same-origin e varredura multi-página
+            crawl_res = {
+                "enabled": crawl_enabled,
+                "start_url": target_url,
+                "total": 0,
+                "truncated": False,
+                "errors": [],
+                "pages": [],
+                "inputs_tested": 0,
+                "injection_findings": 0,
+                "web_findings": 0,
+            }
+            if crawl_enabled:
+                crawled = crawl_site(
+                    target_url,
+                    max_pages=crawl_max_pages,
+                    max_depth=2,
+                    seed_html=html_body,
+                )
+                crawl_res = crawl_summary(crawled)
+                crawl_res["enabled"] = True
+                crawl_res["inputs_tested"] = 0
+                crawl_res["injection_findings"] = 0
+                crawl_res["web_findings"] = 0
+
+                seen_pii = {json.dumps(p, sort_keys=True, ensure_ascii=False) for p in pii_findings}
+                injection_keys = {
+                    (f.get("type"), f.get("parameter"), f.get("payload"), f.get("url"))
+                    for f in advanced_injections.get("findings", [])
+                }
+
+                for page in crawled["pages"][1:]:
+                    page_url = page["url"]
+                    page_html = page.get("html") or ""
+                    if not page_html:
+                        continue
+
+                    for p in scan_pii_and_pix(page_html):
+                        key = json.dumps(p, sort_keys=True, ensure_ascii=False)
+                        if key not in seen_pii:
+                            seen_pii.add(key)
+                            pii_findings.append(p)
+
+                    if not _page_has_inputs(page_url, page_html):
+                        continue
+
+                    crawl_res["inputs_tested"] += 1
+
+                    page_adv = run_advanced_injection(page_url, page_html)
+                    advanced_injections["tested"] += page_adv.get("tested", 0)
+                    advanced_injections["parameters"].extend(
+                        f"{page_url} :: {param}" for param in page_adv.get("parameters", [])
+                    )
+                    for finding in page_adv.get("findings", []):
+                        key = (
+                            finding.get("type"), finding.get("parameter"),
+                            finding.get("payload"), finding.get("url"),
+                        )
+                        if key in injection_keys:
+                            continue
+                        injection_keys.add(key)
+                        finding["page"] = page_url
+                        advanced_injections["findings"].append(finding)
+                        crawl_res["injection_findings"] += 1
+
+                    if payloads:
+                        page_vulns = scanner_visual.run_scanner(page_url, payloads)
+                        vuln_results.extend(page_vulns)
+                        crawl_res["web_findings"] += sum(
+                            1 for v in page_vulns if 'Vulnerável' in v.get('Status', '')
+                        )
 
             # Cálculo de Métricas
             criticos = sum(1 for f in auditor.findings if f['status'] == 'FAIL' and f['severity'] == 'Alta')
             medios = sum(1 for f in auditor.findings if f['status'] == 'FAIL' and f['severity'] == 'Média')
             criticos += sum(1 for v in vuln_results if 'Vulnerável' in v.get('Status', ''))
             criticos += len(sensitive_findings)
+            criticos += sum(1 for p in pii_findings if p.get('severity') == 'ALTA')
+            medios += sum(1 for p in pii_findings if p.get('severity') == 'MÉDIA')
+            criticos += sum(1 for s in secret_findings if s.get('severity') == 'ALTA')
+            medios += sum(1 for s in secret_findings if s.get('severity') == 'MÉDIA')
+            criticos += sum(1 for j in jwt_findings if j.get('severity') == 'ALTA')
+            medios += sum(1 for j in jwt_findings if j.get('severity') == 'MÉDIA')
+            criticos += len(advanced_injections.get('findings', []))
 
             if dns_res["spf"]["status"] == "FAIL":
                 medios += 1
@@ -144,6 +255,10 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 medios += 1
 
             final_score = max(0, auditor.score - (len(sensitive_findings) * 20))
+            final_score = max(0, final_score - (sum(1 for p in pii_findings if p.get('severity') == 'ALTA') * 10))
+            final_score = max(0, final_score - (sum(1 for s in secret_findings if s.get('severity') == 'ALTA') * 15))
+            final_score = max(0, final_score - (sum(1 for j in jwt_findings if j.get('severity') == 'ALTA') * 15))
+            final_score = max(0, final_score - (len(advanced_injections.get('findings', [])) * 20))
             if http_methods_res["trace_enabled"]:
                 final_score = max(0, final_score - 10)
 
@@ -159,6 +274,11 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 "dns": dns_res,
                 "recon": recon_res,
                 "cookies": cookies_res,
+                "pii": pii_findings,
+                "secrets": secret_findings,
+                "jwt": jwt_findings,
+                "injections_advanced": advanced_injections,
+                "crawl": crawl_res,
                 "sensitive_files": sensitive_findings,
                 "http_methods": http_methods_res,
                 "subdomains": subdomains_res,
@@ -177,6 +297,44 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
             self.wfile.write(json.dumps(response_payload, ensure_ascii=False).encode('utf-8'))
+        elif self.path == '/api/logs':
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > MAX_LOG_BYTES:
+                self.send_response(413)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(b'{"error": "Arquivo muito grande (limite de 5 MB)"}')
+                return
+
+            post_data = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                content = data.get('content', '')
+                log_type = data.get('log_type', 'auto')
+            except Exception:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'{"error": "JSON invalido"}')
+                return
+
+            if not str(content).strip():
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'{"error": "Conteudo do log obrigatorio"}')
+                return
+
+            try:
+                result = analyze_logs(content, log_type)
+            except Exception as exc:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": f"Falha ao analisar: {exc}"}).encode('utf-8'))
+                return
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(result, ensure_ascii=False).encode('utf-8'))
         else:
             self.send_response(404)
             self.end_headers()
@@ -184,7 +342,12 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
 def run_server():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), PentestHandler) as httpd:
+
+    class ThreadingServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+        # Uma conexão ociosa (ex.: preconnect do navegador) não pode travar o painel
+        daemon_threads = True
+
+    with ThreadingServer(("", PORT), PentestHandler) as httpd:
         print("="*60)
         print(f"🚀 PAINEL DE CONTROLE DE SEGURANÇA UNIFICADO!")
         print(f"👉 Acesse no seu navegador: http://localhost:{PORT}")

@@ -95,6 +95,18 @@
         </div>
       </div>
 
+      <div class="pt-1">
+        <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer hover:border-slate-700 transition">
+          <input type="checkbox" id="crawl-enabled" checked class="mt-0.5 w-4 h-4 accent-indigo-500">
+          <span>
+            <span class="block text-sm font-semibold text-slate-200 flex items-center gap-1.5">
+              <i data-lucide="bug" class="w-4 h-4 text-indigo-400"></i> Rastrear o site (crawler)
+            </span>
+            <span class="block text-xs text-slate-400">Segue links e formulários do mesmo domínio (até 8 páginas) e testa injeções em cada uma.</span>
+          </span>
+        </label>
+      </div>
+
       <!-- Botão de Ação -->
       <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800">
         <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
@@ -131,8 +143,74 @@
       </div>
     </div>
 
+    <!-- Análise de Logs (independente da varredura) -->
+    <details class="mb-8 bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden group">
+      <summary class="cursor-pointer list-none p-5 flex items-center justify-between gap-3 hover:bg-slate-800/40 transition-colors">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30">
+            <i data-lucide="file-search" class="w-5 h-5 text-indigo-400"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-white">Análise de Logs (Apache/Nginx/SSH)</h2>
+            <p class="text-xs text-slate-400">Cole ou envie um log para detectar ataques, força bruta e reconhecimento — não precisa rodar varredura</p>
+          </div>
+        </div>
+        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
+      </summary>
+      <div class="px-5 pb-5 space-y-4 border-t border-slate-800 pt-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Arquivo de log</label>
+            <input type="file" id="log-file" onchange="carregarArquivoLog(this)"
+              class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer bg-slate-950 border border-slate-800 rounded-xl p-1.5" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Tipo de log</label>
+            <select id="log-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+              <option value="auto">Detectar automaticamente</option>
+              <option value="web">Web (Apache/Nginx)</option>
+              <option value="auth">Autenticação (SSH/syslog)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Conteúdo do log</label>
+          <textarea id="log-input" rows="8" spellcheck="false"
+            placeholder='Ex.: 203.0.113.5 - - [06/Nov/2026:10:00:00 -0300] "GET /produto?id=1%20UNION%20SELECT%20NULL HTTP/1.1" 200 512 "-" "sqlmap/1.8"'
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 resize-y"></textarea>
+          <p class="text-[11px] text-slate-500 mt-1">Limite de 5 MB. Formatos suportados: Apache/Nginx combined ou common e logs de autenticação SSH.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <span id="log-file-info" class="text-xs text-slate-400"></span>
+          <button onclick="analisarLogs()" id="btn-logs"
+            class="bg-gradient-to-r from-indigo-600 to-sky-600 hover:opacity-90 text-white font-semibold px-6 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50">
+            <i data-lucide="search" class="w-4 h-4"></i> Analisar Logs
+          </button>
+        </div>
+        <div id="log-results" class="space-y-4"></div>
+      </div>
+    </details>
+
     <!-- Área de Resultados Globais -->
     <div id="resultados" class="hidden space-y-6">
+
+      <!-- Destaque: Resumo de Risco e Impacto Real -->
+      <div id="resumo-risco" class="rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-900 via-slate-900 to-rose-950/30 p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30">
+              <i data-lucide="siren" class="w-5 h-5 text-rose-400"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-white">Resumo de Risco e Impacto Real</h2>
+              <p class="text-xs text-slate-400">O que foi encontrado e como um atacante poderia explorar isso</p>
+            </div>
+          </div>
+          <span id="resumo-veredito" class="self-start text-sm font-extrabold px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300">Avaliando...</span>
+        </div>
+        <div id="resumo-contadores" class="flex flex-wrap gap-2"></div>
+        <div id="resumo-itens" class="space-y-3"></div>
+      </div>
 
       <!-- Métricas em Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -181,6 +259,9 @@
         <button onclick="mudarAba('tab-nmap')" id="btn-tab-nmap" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Nmap Scanner</button>
         <button onclick="mudarAba('tab-headers')" id="btn-tab-headers" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Headers OWASP</button>
         <button onclick="mudarAba('tab-sensitive')" id="btn-tab-sensitive" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Arquivos Sensíveis</button>
+        <button onclick="mudarAba('tab-pii')" id="btn-tab-pii" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">PII & LGPD</button>
+        <button onclick="mudarAba('tab-secrets')" id="btn-tab-secrets" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Segredos Expostos</button>
+        <button onclick="mudarAba('tab-jwt')" id="btn-tab-jwt" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">JWT / Tokens</button>
         <button onclick="mudarAba('tab-ports')" id="btn-tab-ports" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Portas Web & DB</button>
         <button onclick="mudarAba('tab-libs')" id="btn-tab-libs" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Bibliotecas JS</button>
         <button onclick="mudarAba('tab-dns')" id="btn-tab-dns" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">DNS & SPF/DMARC</button>
@@ -189,6 +270,8 @@
         <button onclick="mudarAba('tab-ssl')" id="btn-tab-ssl" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">SSL/TLS</button>
         <button onclick="mudarAba('tab-fuzz')" id="btn-tab-fuzz" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Rotas (Fuzzing)</button>
         <button onclick="mudarAba('tab-vuln')" id="btn-tab-vuln" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Injeções</button>
+        <button onclick="mudarAba('tab-advanced')" id="btn-tab-advanced" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Injeção Avançada</button>
+        <button onclick="mudarAba('tab-crawl')" id="btn-tab-crawl" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Crawler</button>
         <button onclick="mudarAba('tab-history')" id="btn-tab-history" class="tab-btn px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white">Histórico</button>
       </div>
 
@@ -241,6 +324,36 @@
         <div id="conteudo-sensitive" class="space-y-3 text-sm"></div>
       </div>
 
+      <!-- Conteúdo Aba 5.1: PII & LGPD -->
+      <div id="tab-pii" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="shield-alert" class="text-fuchsia-400"></i> Dados Pessoais Expostos (PII & LGPD)</h3>
+          <span id="pii-count-badge" class="text-xs font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300">0 achados</span>
+        </div>
+        <p class="text-xs text-slate-400">Varredura do HTML público em busca de CPF, chaves PIX, telefones, CEP, endereços e e-mails. Dados sensíveis são exibidos de forma mascarada.</p>
+        <div id="conteudo-pii" class="space-y-3 text-sm"></div>
+      </div>
+
+      <!-- Conteúdo Aba 5.2: Segredos Expostos -->
+      <div id="tab-secrets" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="key-round" class="text-orange-400"></i> Chaves, Tokens e Senhas Expostas</h3>
+          <span id="secrets-count-badge" class="text-xs font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300">0 achados</span>
+        </div>
+        <p class="text-xs text-slate-400">Varredura do HTML e dos scripts JavaScript do próprio domínio. Os segredos são exibidos mascarados e o código-fonte nunca é alterado.</p>
+        <div id="conteudo-secrets" class="space-y-3 text-sm"></div>
+      </div>
+
+      <!-- Conteúdo Aba 5.3: JWT / Tokens -->
+      <div id="tab-jwt" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="badge-check" class="text-cyan-400"></i> Análise e Ataque a Tokens JWT</h3>
+          <span id="jwt-count-badge" class="text-xs font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300">0 achados</span>
+        </div>
+        <p class="text-xs text-slate-400">Testes 100% offline: quebra de segredo HMAC, algoritmo <code>none</code>, <code>jku</code>/<code>kid</code>, expiração e dados sensíveis. Nenhum token forjado é enviado automaticamente — a prova de conceito (PoC) é exibida para uso apenas em testes autorizados.</p>
+        <div id="conteudo-jwt" class="space-y-3 text-sm"></div>
+      </div>
+
       <!-- Conteúdo Aba 6: Portas -->
       <div id="tab-ports" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="radio" class="text-emerald-400"></i> Portas Abertas e Serviços Detectados</h3>
@@ -287,6 +400,28 @@
       <div id="tab-vuln" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="bug" class="text-rose-400"></i> Testes de Injeção de Parâmetros</h3>
         <div id="conteudo-vuln" class="space-y-2"></div>
+      </div>
+
+      <!-- Conteúdo Aba 13.1: Injeção Avançada -->
+      <div id="tab-advanced" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="syringe" class="text-orange-400"></i> Injeção Avançada (SSTI, LFI e Command Injection)</h3>
+          <span id="advanced-count-badge" class="shrink-0 whitespace-nowrap text-xs font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300">0 achados</span>
+        </div>
+        <p class="text-xs text-slate-400">Testes não destrutivos: avaliação de expressão (SSTI), leitura de arquivos do sistema (LFI) e eco de marcador exclusivo (Command Injection). Apenas parâmetros descobertos na URL e nos formulários são testados.</p>
+        <div id="advanced-info" class="text-xs text-slate-400"></div>
+        <div id="conteudo-advanced" class="space-y-3 text-sm"></div>
+      </div>
+
+      <!-- Conteúdo Aba 13.2: Crawler -->
+      <div id="tab-crawl" class="tab-content hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="bug" class="text-indigo-400"></i> Mapa do Site (Crawler)</h3>
+          <span id="crawl-count-badge" class="shrink-0 whitespace-nowrap text-xs font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300">0 páginas</span>
+        </div>
+        <p class="text-xs text-slate-400">Páginas descobertas no mesmo domínio, respeitando <code>robots.txt</code> e ignorando arquivos estáticos e rotas destrutivas. Injeções e XSS/SQLi são testados apenas em páginas com parâmetros ou formulários.</p>
+        <div id="crawl-stats" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+        <div id="conteudo-crawl" class="space-y-2 text-sm"></div>
       </div>
 
       <!-- Conteúdo Aba 14: Histórico -->
@@ -343,6 +478,209 @@
       } catch (e) {}
     }
 
+    function escLog(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function carregarArquivoLog(input) {
+      const file = input.files && input.files[0];
+      const info = document.getElementById('log-file-info');
+      if (!file) {
+        info.innerText = '';
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        info.innerHTML = '<span class="text-rose-400">Arquivo maior que 5 MB. Envie um trecho menor.</span>';
+        input.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('log-input').value = e.target.result;
+        info.innerHTML = `<span class="text-emerald-400">${escLog(file.name)} carregado</span> · ${(file.size / 1024).toFixed(1)} KB`;
+      };
+      reader.onerror = () => {
+        info.innerHTML = '<span class="text-rose-400">Falha ao ler o arquivo.</span>';
+      };
+      reader.readAsText(file);
+    }
+
+    async function analisarLogs() {
+      const content = document.getElementById('log-input').value;
+      const logType = document.getElementById('log-type').value;
+      const box = document.getElementById('log-results');
+      const btn = document.getElementById('btn-logs');
+      if (!content.trim()) {
+        box.innerHTML = '<div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 text-sm">Cole ou carregue um log antes de analisar.</div>';
+        return;
+      }
+      btn.disabled = true;
+      box.innerHTML = '<div class="p-3 text-sm text-slate-400 flex items-center gap-2"><span class="animate-spin"><i data-lucide="loader-2" class="w-4 h-4"></i></span> Analisando log...</div>';
+      lucide.createIcons();
+      try {
+        const resp = await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content, log_type: logType })
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          box.innerHTML = `<div class="p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 text-sm">${escLog(data.error || 'Erro ao analisar o log.')}</div>`;
+          return;
+        }
+        renderizarLogs(data);
+      } catch (e) {
+        box.innerHTML = `<div class="p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 text-sm">Falha de conexão: ${escLog(e.message)}</div>`;
+      } finally {
+        btn.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
+    function renderizarLogs(data) {
+      const box = document.getElementById('log-results');
+      const s = data.summary || {};
+      const findings = data.findings || [];
+      const tipoRotulo = { web: 'Web (Apache/Nginx)', auth: 'Autenticação (SSH/syslog)', unknown: 'Formato não reconhecido' }[data.log_type] || data.log_type;
+
+      if (data.log_type === 'unknown') {
+        box.innerHTML = `<div class="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 text-sm">
+          Não foi possível reconhecer o formato do log. Selecione manualmente “Web” ou “Autenticação”.
+        </div>`;
+        return;
+      }
+
+      const alertas = findings.filter(f => f.severity === 'ALTA').length;
+      const medias = findings.filter(f => f.severity === 'MÉDIA').length;
+      const veredito = alertas > 0 ? 'RISCO CRÍTICO' : (medias > 0 ? 'ATENÇÃO' : 'SEM ACHADOS RELEVANTES');
+      const vereditoCor = alertas > 0
+        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+        : (medias > 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30');
+
+      let metrics = `
+        <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+          <p class="text-[11px] uppercase tracking-wide text-slate-500">Linhas lidas</p>
+          <p class="text-xl font-bold text-white">${s.total_lines || 0}</p>
+        </div>
+        <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+          <p class="text-[11px] uppercase tracking-wide text-slate-500">Requisições válidas</p>
+          <p class="text-xl font-bold text-white">${s.requests || 0}</p>
+        </div>
+        <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+          <p class="text-[11px] uppercase tracking-wide text-slate-500">IPs únicos</p>
+          <p class="text-xl font-bold text-white">${s.unique_ips || 0}</p>
+        </div>`;
+      if (data.log_type === 'web') {
+        metrics += `
+        <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+          <p class="text-[11px] uppercase tracking-wide text-slate-500">Taxa de erro (4xx/5xx)</p>
+          <p class="text-xl font-bold ${(s.error_rate || 0) >= 30 ? 'text-rose-400' : 'text-white'}">${s.error_rate || 0}%</p>
+        </div>`;
+      } else {
+        metrics += `
+        <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+          <p class="text-[11px] uppercase tracking-wide text-slate-500">Falhas / Logins aceitos</p>
+          <p class="text-xl font-bold text-white">${s.failed_logins || 0} / <span class="${(s.accepted_logins || 0) > 0 ? 'text-rose-400' : 'text-emerald-400'}">${s.accepted_logins || 0}</span></p>
+        </div>`;
+      }
+
+      // Tabelas auxiliares
+      let extras = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">`;
+      if (data.log_type === 'web') {
+        const ips = (s.top_ips || []).map(x => `<li class="flex justify-between gap-2"><span class="font-mono text-slate-300">${escLog(x.ip)}</span><span class="text-slate-500">${x.count}</span></li>`).join('');
+        const paths = (s.top_paths || []).map(x => `<li class="flex justify-between gap-2"><span class="font-mono text-slate-300 truncate" title="${escLog(x.path)}">${escLog(x.path)}</span><span class="text-slate-500">${x.count}</span></li>`).join('');
+        const statuses = Object.entries(s.status_codes || {}).map(([k, v]) => `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 text-slate-300">${escLog(k)} <span class="text-slate-500">${v}</span></span>`).join(' ');
+        extras += `
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+            <p class="font-semibold text-slate-300 mb-2">Top IPs</p>
+            <ul class="space-y-1">${ips || '<li class="text-slate-500">—</li>'}</ul>
+          </div>
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+            <p class="font-semibold text-slate-300 mb-2">Top rotas</p>
+            <ul class="space-y-1">${paths || '<li class="text-slate-500">—</li>'}</ul>
+          </div>
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-950 md:col-span-2">
+            <p class="font-semibold text-slate-300 mb-2">Códigos de status</p>
+            <div class="flex flex-wrap gap-1.5">${statuses || '<span class="text-slate-500">—</span>'}</div>
+          </div>`;
+      } else {
+        const ips = (s.top_ips || []).map(x => `<li class="flex justify-between gap-2"><span class="font-mono text-slate-300">${escLog(x.ip)}</span><span class="text-slate-500">${x.count}</span></li>`).join('');
+        const users = (s.top_users || []).map(x => `<li class="flex justify-between gap-2"><span class="font-mono text-slate-300">${escLog(x.user)}</span><span class="text-slate-500">${x.count}</span></li>`).join('');
+        extras += `
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+            <p class="font-semibold text-slate-300 mb-2">IPs com mais falhas</p>
+            <ul class="space-y-1">${ips || '<li class="text-slate-500">—</li>'}</ul>
+          </div>
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+            <p class="font-semibold text-slate-300 mb-2">Usuários mais tentados</p>
+            <ul class="space-y-1">${users || '<li class="text-slate-500">—</li>'}</ul>
+          </div>`;
+      }
+      extras += `</div>`;
+
+      let cards = '';
+      if (findings.length === 0) {
+        cards = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400 text-sm">✓ Nenhuma tentativa de ataque ou padrão suspeito encontrado neste log.</div>`;
+      } else {
+        findings.forEach(f => {
+          const cor = f.severity === 'ALTA'
+            ? 'border-rose-500/30 bg-rose-500/5'
+            : (f.severity === 'MÉDIA' ? 'border-amber-500/30 bg-amber-500/5' : 'border-slate-700 bg-slate-950');
+          const badge = f.severity === 'ALTA'
+            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+            : (f.severity === 'MÉDIA' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-300');
+          cards += `
+            <div class="p-4 rounded-xl border ${cor} space-y-2">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="font-bold text-slate-200">${escLog(f.type)} <span class="text-xs font-normal text-slate-500">· ${escLog(f.category)}</span></span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded ${badge}">${escLog(f.severity)}</span>
+              </div>
+              <div class="flex flex-wrap gap-3 text-xs text-slate-400">
+                <span>IP: <span class="font-mono text-slate-200">${escLog(f.source_ip)}</span></span>
+                <span>Ocorrências: <span class="font-semibold text-slate-200">${f.count}</span></span>
+              </div>
+              <p class="text-xs font-mono text-slate-300 bg-slate-950 border border-slate-800 rounded px-2 py-1 break-all">${escLog(f.evidence)}</p>
+              <p class="text-xs text-slate-400">${escLog(f.desc)}</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                <div class="p-2.5 rounded-lg border border-rose-500/20 bg-rose-500/5">
+                  <p class="font-semibold text-rose-300">Como o atacante usa</p>
+                  <p class="text-slate-400 mt-1">${escLog(f.impact)}</p>
+                </div>
+                <div class="p-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
+                  <p class="font-semibold text-emerald-300">Como corrigir</p>
+                  <p class="text-slate-400 mt-1">${escLog(f.fix)}</p>
+                </div>
+              </div>
+            </div>`;
+        });
+      }
+
+      const totalInfo = data.findings_total > findings.length
+        ? `<p class="text-[11px] text-slate-500">Exibindo ${findings.length} de ${data.findings_total} achados.</p>`
+        : '';
+
+      box.innerHTML = `
+        <div class="p-4 rounded-xl border border-slate-700 bg-slate-950 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="file-search" class="w-4 h-4 text-indigo-400"></i>
+              <span class="text-sm font-semibold text-slate-200">${escLog(tipoRotulo)}</span>
+              <span class="text-xs text-slate-500">· ${findings.length} achado(s)</span>
+            </div>
+            <span class="text-xs font-extrabold px-2.5 py-1 rounded ${vereditoCor}">${veredito}</span>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">${metrics}</div>
+        </div>
+        ${extras}
+        <div class="space-y-3">${cards}</div>
+        ${totalInfo}`;
+    }
+
     function mudarAba(id) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(el => {
@@ -379,7 +717,7 @@
         const response = await fetch('/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url, nmap_mode: selectedMode })
+          body: JSON.stringify({ url: url, nmap_mode: selectedMode, crawl: document.getElementById('crawl-enabled').checked })
         });
 
         if (!response.ok) throw new Error('Falha na resposta do servidor');
@@ -397,8 +735,218 @@
       }
     }
 
+    function renderizarResumoRisco(data) {
+      const itens = [];
+      const add = (sev, titulo, evidencia, impacto, acao, aba) => itens.push({ sev, titulo, evidencia, impacto, acao, aba });
+      const lista = arr => Array.isArray(arr) ? arr : [];
+      const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+      // Segredos expostos
+      lista(data.secrets).filter(s => s.severity === 'ALTA').forEach(s => {
+        add('ALTA', 'Segredo exposto: ' + s.type, s.sample + ' — ' + (s.category || ''),
+          'Com essa credencial em mãos, o atacante pode se autenticar em serviços de terceiros em nome da organização, gerar custos, ler dados ou publicar conteúdo malicioso.',
+          'Revogar e rotacionar a chave imediatamente, remover do código e usar variáveis de ambiente ou cofre de segredos.',
+          'tab-secrets');
+      });
+
+      // Tokens JWT exploráveis
+      lista(data.jwt).filter(j => j.severity === 'ALTA').forEach(j => {
+        add('ALTA', 'Token JWT explorável: ' + j.type, j.sample + ' — ' + (j.category || ''),
+          j.impact || 'O atacante pode forjar tokens e assumir a identidade de outros usuários.',
+          j.fix || 'Rotacionar o segredo, rejeitar alg none e validar todas as claims no servidor.',
+          'tab-jwt');
+      });
+
+      // Injeção avançada confirmada
+      lista((data.injections_advanced || {}).findings).forEach(f => {
+        const rotulo = { SSTI: 'SSTI (template injection)', LFI: 'LFI / Path Traversal', CMD: 'Command Injection' }[f.type] || f.type;
+        add('ALTA', rotulo + ' no parâmetro "' + f.parameter + '"',
+          f.method + ' ' + f.url + ' — ' + f.evidence,
+          f.impact || 'O atacante pode executar código/ler arquivos no servidor.',
+          f.fix || 'Validar entradas, não montar comandos/templates com dados do usuário e restringir caminhos.',
+          'tab-advanced');
+      });
+
+      // Arquivos sensíveis
+      lista(data.sensitive_files).forEach(s => {
+        const caminho = s.path || s.url || '';
+        let impacto = 'O atacante pode baixar o arquivo diretamente, sem autenticação, e usar o conteúdo para avançar no ataque.';
+        if (/\.git/i.test(caminho)) impacto = 'Com o repositório exposto, o atacante reconstrói o código-fonte, descobre rotas, chaves e a lógica interna para planejar ataques direcionados.';
+        else if (/\.env|config|docker/i.test(caminho)) impacto = 'O atacante obtém credenciais de banco, tokens e configurações internas para acessar a infraestrutura.';
+        else if (/sql|dump|backup|zip/i.test(caminho)) impacto = 'O atacante baixa um dump completo e expõe dados de clientes, senhas e informações financeiras.';
+        else if (/senha|password|credential|user/i.test(caminho)) impacto = 'O atacante usa a lista de usuários e senhas para tentar login direto no painel ou em outros sistemas (credential stuffing).';
+        add('ALTA', 'Arquivo sensível acessível: ' + (s.description || caminho), caminho, impacto,
+          'Bloquear o acesso no servidor web, remover o arquivo do diretório público e rotacionar quaisquer credenciais expostas.',
+          'tab-sensitive');
+      });
+
+      // Injeções confirmadas
+      lista(data.vulnerabilidades).filter(v => String(v.Status || '').includes('Vulnerável')).forEach(v => {
+        const categoria = String(v.Categoria || '').toUpperCase();
+        let impacto = 'O atacante pode manipular a resposta da aplicação e executar ações não previstas.';
+        if (categoria.includes('XSS')) impacto = 'O atacante injeta um script que roda no navegador das vítimas, permitindo roubo de sessão/cookies e redirecionamento para páginas falsas.';
+        if (categoria.includes('SQL')) impacto = 'O atacante manipula consultas ao banco, podendo ler, alterar ou apagar dados e, em casos graves, obter execução de comandos.';
+        add('ALTA', 'Injeção confirmada: ' + categoria, 'Payload: ' + String(v.Payload || '').slice(0, 120), impacto,
+          'Validar e parametrizar todas as entradas, usar prepared statements e aplicar escaping conforme o contexto.',
+          'tab-vuln');
+      });
+
+      // Dados pessoais sensíveis
+      lista(data.pii).filter(p => p.severity === 'ALTA').forEach(p => {
+        add('ALTA', 'Dado pessoal sensível exposto: ' + p.type, p.sample + ' — ' + (p.category || ''),
+          'O atacante coleta esses dados para fraude de identidade, abertura de crédito, engenharia social e campanhas de phishing direcionadas (risco LGPD).',
+          'Remover da página pública, restringir acesso por autenticação e avaliar notificação de incidente conforme a LGPD.',
+          'tab-pii');
+      });
+
+      // Métodos HTTP inseguros
+      const hm = data.http_methods;
+      if (hm) {
+        if (hm.trace_enabled) {
+          add('MÉDIA', 'Método HTTP TRACE habilitado', 'TRACE responde ecoando a requisição',
+            'O atacante pode usar Cross-Site Tracing (XST) para contornar a flag HttpOnly e capturar cookies de sessão.',
+            'Desabilitar o método TRACE no servidor web.', 'tab-httpmethods');
+        } else if (hm.status === 'FAIL') {
+          add('MÉDIA', 'Métodos HTTP de escrita habilitados', (hm.allowed_methods || []).join(', '),
+            'O atacante pode tentar sobrescrever arquivos ou apagar recursos caso encontre endpoints sem autenticação.',
+            'Restringir métodos ao mínimo necessário e exigir autenticação.', 'tab-httpmethods');
+        }
+      }
+
+      // Cabeçalhos críticos ausentes
+      const headersFalha = lista(data.headers).filter(h => h.status === 'FAIL' && h.severity === 'Alta');
+      if (headersFalha.length) {
+        add('ALTA', headersFalha.length + ' cabeçalho(s) de segurança crítico(s) ausente(s)',
+          headersFalha.map(h => h.header).join(', '),
+          'A ausência de HSTS permite SSL stripping e downgrade para HTTP; sem CSP o impacto de um XSS é muito maior; sem proteção anti-clickjacking o site pode ser embutido em páginas falsas.',
+          'Aplicar os cabeçalhos recomendados na aba Headers OWASP e validar em todos os ambientes.', 'tab-headers');
+      }
+
+      // Portas e serviços sensíveis expostos
+      const portasRisco = lista(data.ports).filter(p => [21, 22, 3000, 3306, 5432, 6379, 8000, 8080, 8443, 27017].includes(p.port));
+      portasRisco.forEach(p => {
+        const banco = [3306, 5432, 6379, 27017].includes(p.port);
+        add(banco ? 'ALTA' : 'MÉDIA', 'Serviço exposto na porta ' + p.port + ' (' + p.service + ')',
+          'Porta ' + p.port + ' acessível publicamente',
+          banco
+            ? 'O atacante pode tentar conexão direta ao banco, força bruta de credenciais e leitura/exportação de dados sem passar pela aplicação.'
+            : 'O atacante pode tentar força bruta, explorar versões vulneráveis do serviço ou usá-lo como caminho lateral na rede.',
+          'Restringir o acesso por firewall/VPN, exigir autenticação forte e atualizar o serviço.', 'tab-ports');
+      });
+
+      // E-mail / DNS
+      if (data.dns) {
+        if (data.dns.spf && data.dns.spf.status === 'FAIL') {
+          add('MÉDIA', 'SPF ausente ou inválido', data.dns.spf.record || 'Nenhum registro',
+            'O atacante pode enviar e-mails falsos em nome do domínio, facilitando phishing e fraude contra clientes.',
+            'Publicar um registro SPF restritivo e revisar os servidores autorizados.', 'tab-dns');
+        }
+        if (data.dns.dmarc && data.dns.dmarc.status === 'FAIL') {
+          add('MÉDIA', 'DMARC ausente ou inválido', data.dns.dmarc.record || 'Nenhum registro',
+            'Sem DMARC, e-mails falsificados não são bloqueados nem monitorados, aumentando o sucesso de phishing.',
+            'Publicar política DMARC (p=quarantine/reject) e acompanhar relatórios.', 'tab-dns');
+        }
+      }
+
+      // Cookies sem flags
+      const cookiesInseguros = lista(data.cookies).filter(c => c.status === 'FAIL');
+      if (cookiesInseguros.length) {
+        add('MÉDIA', cookiesInseguros.length + ' cookie(s) sem flags de segurança', cookiesInseguros.map(c => c.name).join(', '),
+          'O atacante pode interceptar ou acessar o cookie via XSS e reutilizar a sessão da vítima sem precisar de senha.',
+          'Aplicar Secure, HttpOnly e SameSite nos cookies de sessão.', 'tab-cookies');
+      }
+
+      // SSL/TLS
+      if (data.ssl && data.ssl.error) {
+        add('ALTA', 'Falha no certificado SSL/TLS', data.ssl.error,
+          'O atacante pode interceptar o tráfego (man-in-the-middle), ler credenciais e alterar conteúdo em redes comprometidas.',
+          'Corrigir a cadeia do certificado, renovar e forçar HTTPS.', 'tab-ssl');
+      }
+
+      // Domínio recente
+      if (data.whois && data.whois.risk_level === 'ALTO') {
+        add('BAIXA', 'Domínio recém-registrado', data.whois.age_text,
+          'Domínios novos são comuns em campanhas de phishing e podem indicar um alvo temporário ou malicioso.',
+          'Verificar a legitimidade do domínio antes de confiar nele.', 'tab-whois');
+      }
+
+      const ordem = { 'ALTA': 0, 'MÉDIA': 1, 'BAIXA': 2 };
+      itens.sort((a, b) => (ordem[a.sev] ?? 3) - (ordem[b.sev] ?? 3));
+
+      const score = Number(data.score) || 0;
+      const criticos = Number(data.criticos) || 0;
+      const veredito = document.getElementById('resumo-veredito');
+      if (criticos > 0 || score < 50) {
+        veredito.innerText = 'RISCO CRÍTICO';
+        veredito.className = 'text-sm font-extrabold px-3 py-1.5 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40';
+      } else if (itens.length > 0 || score < 80) {
+        veredito.innerText = 'ATENÇÃO NECESSÁRIA';
+        veredito.className = 'text-sm font-extrabold px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40';
+      } else {
+        veredito.innerText = 'POSTURA BOA';
+        veredito.className = 'text-sm font-extrabold px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+      }
+
+      const altas = itens.filter(i => i.sev === 'ALTA').length;
+      const medias = itens.filter(i => i.sev === 'MÉDIA').length;
+      const baixas = itens.filter(i => i.sev === 'BAIXA').length;
+      const chip = (label, qtd, cls) => qtd > 0 ? `<span class="text-xs font-semibold px-2.5 py-1 rounded-lg border ${cls}">${label}: ${qtd}</span>` : '';
+      document.getElementById('resumo-contadores').innerHTML =
+        chip('Risco alto', altas, 'bg-rose-500/15 text-rose-300 border-rose-500/30') +
+        chip('Risco médio', medias, 'bg-amber-500/15 text-amber-300 border-amber-500/30') +
+        chip('Observações', baixas, 'bg-sky-500/15 text-sky-300 border-sky-500/30') +
+        `<span class="text-xs font-semibold px-2.5 py-1 rounded-lg border bg-slate-800 text-slate-300 border-slate-700">Total: ${itens.length} ponto(s) de atenção</span>`;
+
+      const container = document.getElementById('resumo-itens');
+      container.innerHTML = '';
+      if (itens.length === 0) {
+        container.innerHTML = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400 text-sm">✓ Nenhum problema grave identificado nesta varredura. Mantenha o monitoramento periódico.</div>`;
+        return;
+      }
+
+      const estilo = {
+        'ALTA': { badge: 'bg-rose-500/20 text-rose-300 border border-rose-500/40', rotulo: 'RISCO ALTO', borda: 'border-rose-500/30', impacto: 'border-rose-500/20 bg-rose-500/5', impactoTxt: 'text-rose-300' },
+        'MÉDIA': { badge: 'bg-amber-500/20 text-amber-300 border border-amber-500/40', rotulo: 'RISCO MÉDIO', borda: 'border-amber-500/30', impacto: 'border-amber-500/20 bg-amber-500/5', impactoTxt: 'text-amber-300' },
+        'BAIXA': { badge: 'bg-sky-500/20 text-sky-300 border border-sky-500/40', rotulo: 'OBSERVAÇÃO', borda: 'border-sky-500/30', impacto: 'border-sky-500/20 bg-sky-500/5', impactoTxt: 'text-sky-300' }
+      };
+
+      const visiveis = itens.slice(0, 8);
+      const restantes = itens.length - visiveis.length;
+      visiveis.forEach(i => {
+        const c = estilo[i.sev] || estilo['BAIXA'];
+        container.innerHTML += `
+          <div class="rounded-xl border ${c.borda} bg-slate-950/70 p-4 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+              <div class="flex items-start gap-2 min-w-0">
+                <span class="shrink-0 text-xs font-extrabold px-2 py-0.5 rounded ${c.badge}">${c.rotulo}</span>
+                <div class="min-w-0">
+                  <p class="font-bold text-slate-100">${esc(i.titulo)}</p>
+                  <p class="text-xs font-mono text-slate-400 break-all mt-0.5">${esc(i.evidencia)}</p>
+                </div>
+              </div>
+              <button onclick="mudarAba('${i.aba}')" class="shrink-0 self-start text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Ver detalhes</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+              <div class="p-2.5 rounded-lg border ${c.impacto}">
+                <p class="font-semibold ${c.impactoTxt} flex items-center gap-1.5"><i data-lucide="crosshair" class="w-3.5 h-3.5"></i> Como o atacante pode usar</p>
+                <p class="text-slate-400 mt-1">${esc(i.impacto)}</p>
+              </div>
+              <div class="p-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
+                <p class="font-semibold text-emerald-300 flex items-center gap-1.5"><i data-lucide="wrench" class="w-3.5 h-3.5"></i> Como corrigir</p>
+                <p class="text-slate-400 mt-1">${esc(i.acao)}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      if (restantes > 0) {
+        container.innerHTML += `<p class="text-xs text-slate-400 px-1">+ ${restantes} outro(s) ponto(s) de atenção. Consulte as abas abaixo para o detalhamento completo.</p>`;
+      }
+    }
+
     function renderizarResultados(data) {
       document.getElementById('resultados').classList.remove('hidden');
+      renderizarResumoRisco(data);
 
       // 1. Métricas
       const scoreEl = document.getElementById('score-val');
@@ -603,6 +1151,126 @@
         boxSens.innerHTML = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400">✓ Nenhum arquivo de credenciais (senhas.txt, passwords.txt) ou configurações (.env, .git, dumps) foi detectado na raiz da aplicação.</div>`;
       }
 
+      // 6.1 Aba PII & LGPD
+      const boxPii = document.getElementById('conteudo-pii');
+      const badgePii = document.getElementById('pii-count-badge');
+      boxPii.innerHTML = '';
+      const piiList = data.pii || [];
+      const piiHigh = piiList.filter(p => p.severity === 'ALTA').length;
+      badgePii.innerText = piiList.length + (piiList.length === 1 ? ' achado' : ' achados');
+      badgePii.className = 'text-xs font-bold px-2.5 py-1 rounded ' + (piiHigh > 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : (piiList.length > 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300'));
+      if (piiList.length > 0) {
+        piiList.forEach(p => {
+          const sev = p.severity || 'BAIXA';
+          const sevClass = sev === 'ALTA'
+            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+            : (sev === 'MÉDIA' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30');
+          const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          boxPii.innerHTML += `
+            <div class="p-4 rounded-xl border border-slate-800 bg-slate-950 space-y-1">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-slate-200">${esc(p.type)}</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded ${sevClass}">${esc(sev)}</span>
+              </div>
+              <p class="text-xs text-fuchsia-300">${esc(p.category)}</p>
+              <p class="font-mono text-xs text-slate-100 bg-slate-900 border border-slate-800 rounded px-2 py-1 break-all">${esc(p.sample)}</p>
+              <p class="text-xs text-slate-400">${esc(p.desc)}</p>
+            </div>
+          `;
+        });
+      } else {
+        boxPii.innerHTML = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400">✓ Nenhum dado pessoal (CPF, PIX, telefone, endereço ou e-mail) foi identificado no HTML público da página.</div>`;
+      }
+
+      // 6.2 Aba Segredos Expostos
+      const boxSecrets = document.getElementById('conteudo-secrets');
+      const badgeSecrets = document.getElementById('secrets-count-badge');
+      boxSecrets.innerHTML = '';
+      const secretsList = data.secrets || [];
+      const secretsHigh = secretsList.filter(s => s.severity === 'ALTA').length;
+      badgeSecrets.innerText = secretsList.length + (secretsList.length === 1 ? ' achado' : ' achados');
+      badgeSecrets.className = 'text-xs font-bold px-2.5 py-1 rounded ' + (secretsHigh > 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : (secretsList.length > 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300'));
+      if (secretsList.length > 0) {
+        secretsList.forEach(s => {
+          const sev = s.severity || 'MÉDIA';
+          const sevClass = sev === 'ALTA'
+            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+            : (sev === 'MÉDIA' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30');
+          const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          const src = s.source || '';
+          const srcLabel = src.startsWith('http')
+            ? `<a href="${esc(src)}" target="_blank" rel="noopener" class="text-sky-300 hover:underline break-all">${esc(src)}</a>`
+            : esc(src);
+          boxSecrets.innerHTML += `
+            <div class="p-4 rounded-xl border border-slate-800 bg-slate-950 space-y-1">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-slate-200 flex items-center gap-2"><i data-lucide="key-round" class="w-4 h-4 text-orange-400"></i> ${esc(s.type)}</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded ${sevClass}">${esc(sev)}</span>
+              </div>
+              <p class="text-xs text-orange-300">${esc(s.category)}</p>
+              <p class="font-mono text-xs text-slate-100 bg-slate-900 border border-slate-800 rounded px-2 py-1 break-all">${esc(s.sample)}</p>
+              <p class="text-xs text-slate-400">${esc(s.desc)}</p>
+              <p class="text-xs text-slate-500 pt-1 border-t border-slate-800">Origem: ${srcLabel}</p>
+            </div>
+          `;
+        });
+      } else {
+        boxSecrets.innerHTML = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400">✓ Nenhuma chave de API, token, senha ou chave privada foi identificada no HTML e nos scripts do domínio.</div>`;
+      }
+
+      // 6.3 Aba JWT / Tokens
+      const boxJwt = document.getElementById('conteudo-jwt');
+      const badgeJwt = document.getElementById('jwt-count-badge');
+      boxJwt.innerHTML = '';
+      const jwtList = data.jwt || [];
+      const jwtHigh = jwtList.filter(j => j.severity === 'ALTA').length;
+      badgeJwt.innerText = jwtList.length + (jwtList.length === 1 ? ' achado' : ' achados');
+      badgeJwt.className = 'text-xs font-bold px-2.5 py-1 rounded ' + (jwtHigh > 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : (jwtList.length > 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300'));
+      if (jwtList.length > 0) {
+        jwtList.forEach(j => {
+          const sev = j.severity || 'MÉDIA';
+          const sevClass = sev === 'ALTA'
+            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+            : (sev === 'MÉDIA' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30');
+          const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          const src = j.source || '';
+          const srcLabel = src.startsWith('http')
+            ? `<a href="${esc(src)}" target="_blank" rel="noopener" class="text-sky-300 hover:underline break-all">${esc(src)}</a>`
+            : esc(src);
+          const pocHtml = j.poc
+            ? `<details class="pt-2 text-xs">
+                 <summary class="cursor-pointer text-rose-300 hover:text-rose-200">Ver token forjado (PoC) — apenas para testes autorizados</summary>
+                 <code class="block mt-2 p-2 bg-slate-900 border border-rose-500/30 rounded font-mono text-[11px] text-rose-200 break-all">${esc(j.poc)}</code>
+               </details>`
+            : '';
+          boxJwt.innerHTML += `
+            <div class="p-4 rounded-xl border border-slate-800 bg-slate-950 space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-slate-200 flex items-center gap-2"><i data-lucide="key" class="w-4 h-4 text-cyan-400"></i> ${esc(j.type)}</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded ${sevClass}">${esc(sev)}</span>
+              </div>
+              <p class="text-xs text-cyan-300">${esc(j.category)}</p>
+              <p class="font-mono text-xs text-slate-100 bg-slate-900 border border-slate-800 rounded px-2 py-1 break-all">${esc(j.sample)}</p>
+              <p class="text-xs text-slate-400">${esc(j.desc)}</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                <div class="p-2.5 rounded-lg border border-rose-500/20 bg-rose-500/5">
+                  <p class="font-semibold text-rose-300">Como o atacante usa</p>
+                  <p class="text-slate-400 mt-1">${esc(j.impact || '')}</p>
+                </div>
+                <div class="p-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
+                  <p class="font-semibold text-emerald-300">Como corrigir</p>
+                  <p class="text-slate-400 mt-1">${esc(j.fix || '')}</p>
+                </div>
+              </div>
+              <p class="text-xs text-slate-500 pt-1 border-t border-slate-800">Origem: ${srcLabel}</p>
+              ${pocHtml}
+            </div>
+          `;
+        });
+      } else {
+        boxJwt.innerHTML = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400">✓ Nenhuma falha explorável de JWT identificada (segredo forte, algoritmo válido e claims sem dados sensíveis).</div>`;
+      }
+
       // 7. Aba Portas
       const boxPorts = document.getElementById('conteudo-ports');
       boxPorts.innerHTML = '';
@@ -777,20 +1445,131 @@
       const boxVuln = document.getElementById('conteudo-vuln');
       boxVuln.innerHTML = '';
       if (data.vulnerabilidades && data.vulnerabilidades.length > 0) {
+        const escV = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         data.vulnerabilidades.forEach(v => {
-          const isVuln = v.Status.includes('Vulnerável');
+          const isVuln = String(v.Status || '').includes('Vulnerável');
           boxVuln.innerHTML += `
             <div class="p-3 rounded-lg border ${isVuln ? 'border-rose-500/40 bg-rose-950/20' : 'border-slate-800 bg-slate-950'} flex items-center justify-between text-xs">
               <div>
-                <span class="font-bold text-slate-200">[${v.Categoria.toUpperCase()}]</span>
-                <code class="ml-2 text-slate-300">${v.Payload}</code>
+                <span class="font-bold text-slate-200">[${escV(v.Categoria || '').toUpperCase()}]</span>
+                <code class="ml-2 text-slate-300">${escV(v.Payload || '')}</code>
               </div>
-              <span class="font-bold ${isVuln ? 'text-rose-400' : 'text-emerald-400'}">${v.Status}</span>
+              <span class="font-bold ${isVuln ? 'text-rose-400' : 'text-emerald-400'}">${escV(v.Status || '')}</span>
             </div>
           `;
         });
       } else {
         boxVuln.innerHTML = `<p class="text-slate-400">Nenhuma anomalia de injeção identificada nos testes rápidos.</p>`;
+      }
+
+      // 15. Aba Injeção Avançada (SSTI / LFI / Command Injection)
+      const boxAdvanced = document.getElementById('conteudo-advanced');
+      const badgeAdvanced = document.getElementById('advanced-count-badge');
+      const adv = data.injections_advanced || {};
+      const advFindings = adv.findings || [];
+      boxAdvanced.innerHTML = '';
+      badgeAdvanced.innerText = advFindings.length + (advFindings.length === 1 ? ' achado' : ' achados');
+      badgeAdvanced.className = 'text-xs font-bold px-2.5 py-1 rounded ' + (advFindings.length > 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300');
+      const paramsAdv = adv.parameters || [];
+      const paramsTxt = paramsAdv.slice(0, 6).join(', ') + (paramsAdv.length > 6 ? ` +${paramsAdv.length - 6}` : '');
+      document.getElementById('advanced-info').innerHTML =
+        `<i data-lucide="scan-search" class="w-3.5 h-3.5 inline mb-0.5"></i> ${adv.tested || 0} requisição(ões) de teste · Parâmetros: ${paramsTxt || 'nenhum'}`;
+      if (advFindings.length > 0) {
+        const escA = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        advFindings.forEach(f => {
+          const sev = f.severity || 'ALTA';
+          const sevClass = sev === 'ALTA'
+            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+            : 'bg-amber-500/20 text-amber-300 border border-amber-500/30';
+          const rotulo = { SSTI: 'SSTI', LFI: 'LFI / Path Traversal', CMD: 'Command Injection' }[f.type] || f.type;
+          boxAdvanced.innerHTML += `
+            <div class="p-4 rounded-xl border border-rose-500/30 bg-slate-950 space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-slate-200 flex items-center gap-2"><i data-lucide="syringe" class="w-4 h-4 text-orange-400"></i> ${escA(rotulo)} — parâmetro <code class="text-orange-300">${escA(f.parameter)}</code></span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded ${sevClass}">${escA(sev)}</span>
+              </div>
+              <p class="text-xs text-orange-300">${escA(f.method)} ${escA(f.url)}</p>
+              <p class="text-xs font-mono text-slate-100 bg-slate-900 border border-slate-800 rounded px-2 py-1 break-all">${escA(f.payload)}</p>
+              <p class="text-xs text-amber-300">${escA(f.evidence)}</p>
+              <p class="text-xs text-slate-400">${escA(f.desc)}</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                <div class="p-2.5 rounded-lg border border-rose-500/20 bg-rose-500/5">
+                  <p class="font-semibold text-rose-300">Como o atacante usa</p>
+                  <p class="text-slate-400 mt-1">${escA(f.impact || '')}</p>
+                </div>
+                <div class="p-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
+                  <p class="font-semibold text-emerald-300">Como corrigir</p>
+                  <p class="text-slate-400 mt-1">${escA(f.fix || '')}</p>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      } else {
+        boxAdvanced.innerHTML = `<div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/10 text-emerald-400">✓ Nenhuma injeção SSTI, LFI ou Command Injection confirmada nos parâmetros testados.</div>`;
+      }
+
+      // 16. Aba Crawler (mapa do site e cobertura multi-página)
+      const crawl = data.crawl || {};
+      const crawlPages = crawl.pages || [];
+      const statsCrawl = document.getElementById('crawl-stats');
+      const boxCrawl = document.getElementById('conteudo-crawl');
+      const badgeCrawl = document.getElementById('crawl-count-badge');
+      const escC = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      badgeCrawl.innerText = crawlPages.length + (crawlPages.length === 1 ? ' página' : ' páginas');
+      badgeCrawl.className = 'text-xs font-bold px-2.5 py-1 rounded ' + (crawlPages.length > 0 ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-slate-800 text-slate-300');
+
+      if (crawl.enabled === false) {
+        statsCrawl.innerHTML = '';
+        boxCrawl.innerHTML = '<div class="p-4 rounded-xl border border-slate-700 bg-slate-950 text-slate-400 text-sm">Crawler desativado nesta varredura. Marque “Rastrear o site (crawler)” e rode novamente.</div>';
+      } else {
+        const formsTotal = crawlPages.reduce((acc, p) => acc + (p.forms || 0), 0);
+        statsCrawl.innerHTML = `
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+            <p class="text-[11px] uppercase tracking-wide text-slate-500">Páginas mapeadas</p>
+            <p class="text-xl font-bold text-white">${crawlPages.length}${crawl.truncated ? ' <span class="text-xs font-normal text-amber-400">(limite)</span>' : ''}</p>
+          </div>
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+            <p class="text-[11px] uppercase tracking-wide text-slate-500">Formulários encontrados</p>
+            <p class="text-xl font-bold text-white">${formsTotal}</p>
+          </div>
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+            <p class="text-[11px] uppercase tracking-wide text-slate-500">Páginas com entrada testadas</p>
+            <p class="text-xl font-bold text-white">${crawl.inputs_tested || 0}</p>
+          </div>
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-950">
+            <p class="text-[11px] uppercase tracking-wide text-slate-500">Achados nas páginas extras</p>
+            <p class="text-xl font-bold ${((crawl.injection_findings || 0) + (crawl.web_findings || 0)) > 0 ? 'text-rose-400' : 'text-emerald-400'}">${(crawl.injection_findings || 0) + (crawl.web_findings || 0)}</p>
+          </div>`;
+
+        if (crawlPages.length === 0) {
+          boxCrawl.innerHTML = '<div class="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 text-sm">Nenhuma página pôde ser mapeada. Verifique se o alvo responde HTML e permite crawling.</div>';
+        } else {
+          boxCrawl.innerHTML = '';
+          crawlPages.forEach(page => {
+            const ok = page.status >= 200 && page.status < 400;
+            const statusClass = ok ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300';
+            const indent = Math.min(page.depth || 0, 4) * 14;
+            const extras = [];
+            if (page.forms) extras.push(`${page.forms} form(s)`);
+            if (page.links) extras.push(`${page.links} link(s)`);
+            boxCrawl.innerHTML += `
+              <div class="p-3 rounded-xl border border-slate-800 bg-slate-950 flex items-start justify-between gap-3" style="margin-left: ${indent}px">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-slate-200 truncate" title="${escC(page.title || page.url)}">${escC(page.title || '(sem título)')}</p>
+                  <p class="text-xs font-mono text-slate-400 break-all">${escC(page.url)}</p>
+                  <p class="text-[11px] text-slate-500 mt-1">Profundidade ${page.depth}${extras.length ? ' · ' + extras.join(' · ') : ''}</p>
+                </div>
+                <span class="shrink-0 text-xs font-bold px-2 py-0.5 rounded ${statusClass}">${page.status}</span>
+              </div>`;
+          });
+          if (crawl.errors && crawl.errors.length > 0) {
+            boxCrawl.innerHTML += `<p class="text-[11px] text-amber-400 mt-1">${crawl.errors.length} URL(s) não puderam ser visitadas (robots.txt, erro de rede ou tipo não-HTML).</p>`;
+          }
+        }
+        if ((crawl.injection_findings || 0) + (crawl.web_findings || 0) > 0) {
+          boxCrawl.innerHTML += `<button onclick="mudarAba('tab-advanced')" class="mt-2 text-xs font-semibold text-indigo-300 hover:text-indigo-200 flex items-center gap-1"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i> Ver injeções confirmadas nas páginas rastreadas</button>`;
+        }
       }
 
       lucide.createIcons();
