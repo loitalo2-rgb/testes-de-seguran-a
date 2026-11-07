@@ -394,7 +394,9 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
         else:
             self.send_response(404)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
+            self.wfile.write(b'{"error": "Rota nao encontrada"}')
 
 def run_server():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))

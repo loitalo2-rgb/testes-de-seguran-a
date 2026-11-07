@@ -1795,16 +1795,25 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ host, port })
           });
-          const res = await resp.json();
+          const text = await resp.text();
+          let res = {};
+          try {
+            res = JSON.parse(text);
+          } catch (e) {
+            throw new Error(`Resposta inválida do servidor (HTTP ${resp.status}). Verifique se o servidor 'python app_server.py' foi reiniciado.`);
+          }
           if (!resp.ok) {
             alert('Falha ao iniciar proxy: ' + (res.message || res.error || 'Erro desconhecido'));
           }
         } else {
-          await fetch('/api/proxy/stop', { method: 'POST' });
+          const resp = await fetch('/api/proxy/stop', { method: 'POST' });
+          if (!resp.ok) {
+            console.warn('Aviso ao parar proxy:', resp.status);
+          }
         }
         await checarStatusProxy();
       } catch (err) {
-        alert('Erro de comunicação com o servidor: ' + err);
+        alert('Erro de comunicação com o servidor: ' + (err.message || err));
       } finally {
         btn.disabled = false;
       }
