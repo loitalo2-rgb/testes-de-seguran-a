@@ -107,8 +107,8 @@ def test_generate_executive_html():
             ],
         },
         "ssl": {"cipher": "TLS_AES_256_GCM_SHA384", "protocol": "TLSv1.3", "days_left": 90},
-        "pii": {"total": 3},
-        "secrets": {"total": 1},
+        "pii": [{"type": "CPF", "value": "123.***.***-00"}],
+        "secrets": [{"type": "AWS", "secret": "AKIA***"}],
         "ports": [80, 443],
     }
 

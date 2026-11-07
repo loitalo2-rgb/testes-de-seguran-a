@@ -59,11 +59,15 @@ def generate_executive_html(scan_data: Dict[str, Any]) -> str:
         )
 
     # Detalhes técnicos
-    headers_info = scan_data.get("headers", {})
-    ssl_info = scan_data.get("ssl", {})
+    headers_info = scan_data.get("headers", {}) if isinstance(scan_data.get("headers"), dict) else {}
+    ssl_info = scan_data.get("ssl", {}) if isinstance(scan_data.get("ssl"), dict) else {}
     ports_info = scan_data.get("ports", [])
-    secrets_info = scan_data.get("secrets", {})
-    pii_info = scan_data.get("pii", {})
+    secrets_info = scan_data.get("secrets", [])
+    pii_info = scan_data.get("pii", [])
+
+    pii_total = len(pii_info) if isinstance(pii_info, list) else (pii_info.get("total", 0) if isinstance(pii_info, dict) else 0)
+    secrets_total = len(secrets_info) if isinstance(secrets_info, list) else (secrets_info.get("total", 0) if isinstance(secrets_info, dict) else 0)
+    ports_total = len(ports_info) if isinstance(ports_info, (list, dict)) else 0
 
     linhas_tabela_risco = ""
     if itens_risco:
@@ -263,9 +267,9 @@ def generate_executive_html(scan_data: Dict[str, Any]) -> str:
             </div>
             <div style="background: #F9FAFB; padding: 16px; border-radius: 8px; border: 1px solid #E5E7EB;">
                 <h4 style="margin: 0 0 10px 0; color: #111827;">🛡️ Proteção LGPD & Segredos</h4>
-                <p><strong>PII / Dados Pessoais:</strong> {escape_txt(pii_info.get('total', 0))} achados</p>
-                <p><strong>Segredos / Chaves de API:</strong> {escape_txt(secrets_info.get('total', 0))} chaves detectadas</p>
-                <p><strong>Serviços / Portas Abertas:</strong> {escape_txt(len(ports_info))} identificadas</p>
+                <p><strong>PII / Dados Pessoais:</strong> {escape_txt(pii_total)} achados</p>
+                <p><strong>Segredos / Chaves de API:</strong> {escape_txt(secrets_total)} chaves detectadas</p>
+                <p><strong>Serviços / Portas Abertas:</strong> {escape_txt(ports_total)} identificadas</p>
             </div>
         </div>
 

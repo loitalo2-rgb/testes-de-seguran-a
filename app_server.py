@@ -524,11 +524,17 @@ class PentestHandler(http.server.SimpleHTTPRequestHandler):
                 except Exception:
                     pass
             scan_data = data.get('scan_data', {})
-            html_report = generate_executive_html(scan_data)
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/html; charset=utf-8')
-            self.end_headers()
-            self.wfile.write(html_report.encode('utf-8'))
+            try:
+                html_report = generate_executive_html(scan_data)
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(html_report.encode('utf-8'))
+            except Exception as exc:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": f"Erro ao gerar relatorio: {exc}"}).encode('utf-8'))
         else:
             self.send_response(404)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
